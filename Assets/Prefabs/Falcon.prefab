@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 634193207297899632}
-  - component: {fileID: 7297630699812217355}
   - component: {fileID: 3815741373458099261}
   - component: {fileID: 7207940340177475720}
   m_Layer: 0
@@ -33,20 +32,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 350041218614879680}
+  - {fileID: 2145748559580748704}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7297630699812217355
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 795481937628534593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71a3ec99bf1cedd49af8dab070abe2c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &3815741373458099261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,6 +47,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 806cf5b799ba2ea40997d0b2bc26fbd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  availableActions:
+  - {fileID: 1666229467791147252}
+  - {fileID: 58420529744819088}
+  - {fileID: 6733412204543858398}
+  - {fileID: 8760564246519133356}
 --- !u!195 &7207940340177475720
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -191,6 +184,93 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &7914523578124005967
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2145748559580748704}
+  - component: {fileID: 6733412204543858398}
+  - component: {fileID: 58420529744819088}
+  - component: {fileID: 1666229467791147252}
+  - component: {fileID: 8760564246519133356}
+  m_Layer: 0
+  m_Name: Actions
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2145748559580748704
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7914523578124005967}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 4.750918, y: 6.7704253, z: -3.5126247}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 634193207297899632}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6733412204543858398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7914523578124005967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 812a3b93050a1bd4c8ff543ec9eacf0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Cost: 1
+--- !u!114 &58420529744819088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7914523578124005967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e485ecc220fb4084b8abb481ce8082b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Cost: 1
+--- !u!114 &1666229467791147252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7914523578124005967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44b236a8c32b8e44295ccf10db134205, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Cost: 1
+--- !u!114 &8760564246519133356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7914523578124005967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd7167ff86789084cb88256afbd8fabd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Cost: 1
 --- !u!1 &8989519851350387555
 GameObject:
   m_ObjectHideFlags: 0

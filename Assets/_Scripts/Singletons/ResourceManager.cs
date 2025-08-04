@@ -4,7 +4,10 @@ using System.Collections.Generic;
 public class ResourceManager : MonoBehaviour
 {
     public static ResourceManager Instance { get; private set; }
+    public Dictionary<string, int> resources;
+    public Dictionary<string, bool> globalFacts = new();
 
+   
     private void Awake()
     {
         if (Instance == null)
@@ -14,7 +17,16 @@ public class ResourceManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    public Dictionary<string, int> resources;
+    public bool GetFact(string key)
+    {
+        return globalFacts.ContainsKey(key) && globalFacts[key];
+    }
+
+    public void SetFact(string key, bool value)
+    {
+        globalFacts[key] = value;
+    }
+
 
     public void Add(string resourceName, int amount)
     {

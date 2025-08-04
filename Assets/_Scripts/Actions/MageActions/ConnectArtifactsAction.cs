@@ -5,9 +5,9 @@ public class ConnectArtifactsAction : GoapAction
 {
     public override HashSet<KeyValuePair<string, object>> Preconditions => new()
     {
-        new("AtBuildSite", true),
         new("EnchantedStaffBuilt", true),
-        new("RunedShieldBuilt", true)
+        new("RunedShieldBuilt", true),
+        new("AtBuildSite", true)
     };
 
     public override HashSet<KeyValuePair<string, object>> Effects => new()
@@ -17,21 +17,19 @@ public class ConnectArtifactsAction : GoapAction
 
     public override bool IsValid(GameObject agent)
     {
-        return true; // Assumes conditions are validated by world state
+        return true; // Planner checks preconditions
     }
 
     public override bool Perform(GameObject agent)
     {
-        if (!done)
-        {
-            Debug.Log("Mage is combining the artifacts into the Combined Magical Artifact!");
-            done = true;
-        }
-
+        Debug.Log("Mage connected Enchanted Staff and Runed Shield!");
+        ResourceManager.Instance.SetFact("CombinedMagicalArtifactBuilt", true);
+        done = true;
         return true;
     }
 
     public override bool IsDone() => done;
     public override void Reset() => done = false;
 }
+
 

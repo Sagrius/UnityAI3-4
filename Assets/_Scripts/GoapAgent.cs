@@ -1,20 +1,30 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
 public class GoapAgent : MonoBehaviour
 {
-    private Queue<GoapAction> actionQueue;
+    public List<GoapAction> availableActions = new(); // Inspector-visible
+
     public Dictionary<string, object> worldState = new();
-    public HashSet<GoapAction> availableActions = new();
     public HashSet<KeyValuePair<string, object>> goal;
 
-    void Start() => availableActions = new(GetComponents<GoapAction>());
+    private Queue<GoapAction> actionQueue;
+
+    void Awake()
+    {
+        // Optional sanity check
+        foreach (var action in availableActions)
+        {
+            if (action == null) Debug.LogWarning($"Missing GOAP action on {gameObject.name}");
+        }
+    }
 
     void Update()
     {
         if (actionQueue == null || actionQueue.Count == 0)
         {
+            BuildWorldState();
             Plan();
             return;
         }
@@ -32,8 +42,17 @@ public class GoapAgent : MonoBehaviour
     void Plan()
     {
         GoapPlanner planner = new();
-        actionQueue = planner.Plan(gameObject, availableActions, worldState, goal);
+        var usableActions = new HashSet<GoapAction>(availableActions.Where(a => a.IsValid(gameObject)));
+
+        actionQueue = planner.Plan(gameObject, usableActions, worldState, goal);
+    }
+
+    void BuildWorldState()
+    {
+        worldState.Clear();
+        // Add facts like "AtBuildSite", "FalconAvailable", etc.
     }
 }
+
 
 
