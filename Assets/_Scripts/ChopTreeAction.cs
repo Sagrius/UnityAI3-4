@@ -1,24 +1,48 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System;
+using UnityEngine.AI;
 
 public class ChopTreeAction : GoapAction
 {
-    public override bool CheckPrecondition(GameObject agent)
+    private NavMeshAgent _agent;
+    private void Awake()
     {
-        // Find tree
+        _agent = GetComponent<NavMeshAgent>();
+    }
+    public override bool IsValid(GameObject agent)
+    {
         target = FindClosestWithTag("Tree");
-        return target != null;
+        bool isValid = target != null;
+        if(isValid) _agent.SetDestination(target.transform.position);
+        return isValid;
     }
 
-    private GameObject FindClosestWithTag(string v)
+    protected GameObject FindClosestWithTag(string tag)
     {
-        throw new NotImplementedException();
+        GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag(tag);
+        GameObject closest = null;
+        float closestDistance = Mathf.Infinity;
+        Vector3 currentPosition = transform.position;
+
+        foreach (GameObject obj in taggedObjects)
+        {
+            float distance = Vector3.Distance(currentPosition, obj.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closest = obj;
+            }
+        }
+
+       
+        return closest;
     }
 
     public override bool Perform(GameObject agent)
     {
-        // Simulate chopping
+        if (Vector3.Distance(agent.transform.position, target.transform.position) > 2f) return false;
+
+
         ResourceManager.Instance.Add("OakLog", 1);
         done = true;
         return true;
@@ -28,8 +52,8 @@ public class ChopTreeAction : GoapAction
 
     public override void Reset() => done = false;
 
-    public override HashSet<KeyValuePair<string, bool>> Preconditions => new() { };
-    public override HashSet<KeyValuePair<string, bool>> Effects => new()
+    public override HashSet<KeyValuePair<string, object>> Preconditions => new() { };
+    public override HashSet<KeyValuePair<string, object>> Effects => new()
     {
         new("HasOakLog", true)
     };

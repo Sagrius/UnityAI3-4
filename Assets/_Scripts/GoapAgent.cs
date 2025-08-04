@@ -4,40 +4,36 @@ using System.Linq;
 
 public class GoapAgent : MonoBehaviour
 {
-    public List<GoapAction> actions = new();
-    public Queue<GoapAction> currentPlan;
-    public Dictionary<string, bool> worldState;
-    public Dictionary<string, bool> goal;
+    private Queue<GoapAction> actionQueue;
+    public Dictionary<string, object> worldState = new();
+    public HashSet<GoapAction> availableActions = new();
+    public HashSet<KeyValuePair<string, object>> goal;
 
-    void Start()
-    {
-        actions = GetComponents<GoapAction>().ToList();
-    }
+    void Start() => availableActions = new(GetComponents<GoapAction>());
 
     void Update()
     {
-        if (currentPlan == null || currentPlan.Count == 0)
+        if (actionQueue == null || actionQueue.Count == 0)
         {
             Plan();
+            return;
         }
+
+        var currentAction = actionQueue.Peek();
+        if (!currentAction.IsDone())
+            currentAction.Perform(gameObject);
         else
         {
-            var action = currentPlan.Peek();
-            if (action.IsDone())
-            {
-                currentPlan.Dequeue();
-            }
-            else
-            {
-                action.Perform(gameObject);
-            }
+            currentAction.Reset();
+            actionQueue.Dequeue();
         }
     }
 
     void Plan()
     {
-        goal = new Dictionary<string, bool> { { "CombinedMagicalArtifactBuilt", true } };
-        // Add planner logic or plug in a planner here
+        GoapPlanner planner = new();
+        actionQueue = planner.Plan(gameObject, availableActions, worldState, goal);
     }
 }
+
 

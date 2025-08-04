@@ -19,7 +19,7 @@ public class ResourceManager : MonoBehaviour
     public void Add(string resourceName, int amount)
     {
         if (!resources.ContainsKey(resourceName)) resources.Add(resourceName, amount);
-        else resources[resourceName] = amount;
+        else resources[resourceName] += amount;
     }
     public bool Has(string resourceName, int amount) 
     {
