@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class FalconAgent : MonoBehaviour
+public class FalconGoapAgent : MonoBehaviour
 {
     public Transform pickupTarget;
     public Transform buildTarget;

@@ -1,8 +1,15 @@
 using UnityEngine;
+using UnityEngine.AI;
 using System.Collections.Generic;
 
 public class CarryResourceToBuildAction : GoapAction
 {
+    private NavMeshAgent _navMesh;
+
+    private void Awake()
+    {
+        _navMesh = transform.root.GetComponent<UnityEngine.AI.NavMeshAgent>();
+    }
     public override HashSet<KeyValuePair<string, object>> Preconditions => new()
     {
         new("ResourceReady", true),
@@ -21,7 +28,7 @@ public class CarryResourceToBuildAction : GoapAction
         if (!done)
         {
             var buildLocation = GameObject.FindGameObjectWithTag("BuildLocation");
-            agent.GetComponent<UnityEngine.AI.NavMeshAgent>().SetDestination(buildLocation.transform.position);
+            _navMesh.SetDestination(buildLocation.transform.position);
             // You could also simulate a drop there
             ResourceManager.Instance.Add("CarriedResource", 1);
             done = true;

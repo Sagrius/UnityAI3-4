@@ -18,7 +18,7 @@ public class ReturnToIdleAction : GoapAction
 
     public override bool Perform(GameObject agent)
     {
-        var falcon = agent.GetComponent<FalconAgent>();
+        var falcon = agent.GetComponent<FalconGoapAgent>();
         if (falcon != null)
         {
             falcon.isCarryingResource = false;

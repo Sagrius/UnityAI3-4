@@ -9,11 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3549654386132110009}
-  - component: {fileID: 85946638828603129}
   - component: {fileID: 7679892938582319726}
+  - component: {fileID: 3581063006561416375}
   m_Layer: 0
   m_Name: Villager
-  m_TagString: Friendly
+  m_TagString: Villager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -35,26 +35,6 @@ Transform:
   - {fileID: 2280198393700518613}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &85946638828603129
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1817550379402266319}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 806cf5b799ba2ea40997d0b2bc26fbd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  availableActions:
-  - {fileID: 8371429891812706959}
-  - {fileID: 2309696562624033702}
-  - {fileID: 699306642242120226}
-  - {fileID: 8258916553948835764}
-  - {fileID: 7994127879307869896}
-  - {fileID: 3571954057752994677}
-  - {fileID: 3605731646188617091}
 --- !u!195 &7679892938582319726
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -77,6 +57,29 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &3581063006561416375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1817550379402266319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 385eb0253590c8046bcec68b52003c50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  availableActions:
+  - {fileID: 8371429891812706959}
+  - {fileID: 2309696562624033702}
+  - {fileID: 699306642242120226}
+  - {fileID: 8258916553948835764}
+  - {fileID: 7994127879307869896}
+  - {fileID: 3571954057752994677}
+  - {fileID: 3605731646188617091}
+  currentGoalText: 
+  currentActionText: 
+  currentPlanActions: []
 --- !u!1 &2983579928658668156
 GameObject:
   m_ObjectHideFlags: 0

@@ -120,10 +120,10 @@ GameObject:
   m_Component:
   - component: {fileID: 2933757741126355458}
   - component: {fileID: 1184759230315416203}
-  - component: {fileID: 7825915210600686672}
+  - component: {fileID: 337053501960470293}
   m_Layer: 0
   m_Name: Mage
-  m_TagString: Friendly
+  m_TagString: Mage
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -167,7 +167,7 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &7825915210600686672
+--- !u!114 &337053501960470293
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5181193516691561466}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 806cf5b799ba2ea40997d0b2bc26fbd5, type: 3}
+  m_Script: {fileID: 11500000, guid: b2808bcc517a8f04d8cdd793512e64c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   availableActions:
@@ -184,6 +184,9 @@ MonoBehaviour:
   - {fileID: 7304666630595062666}
   - {fileID: 7436531853576188357}
   - {fileID: 4839534704738112060}
+  currentGoalText: 
+  currentActionText: 
+  currentPlanActions: []
 --- !u!1 &6386716828680625508
 GameObject:
   m_ObjectHideFlags: 0

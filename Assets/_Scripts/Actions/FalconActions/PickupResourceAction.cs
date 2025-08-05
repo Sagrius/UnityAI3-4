@@ -18,7 +18,7 @@ public class PickupResourceAction : GoapAction
 
     public override bool Perform(GameObject agent)
     {
-        var falcon = agent.GetComponent<FalconAgent>();
+        var falcon = agent.GetComponent<FalconGoapAgent>();
         if (falcon != null)
         {
             Debug.Log("Falcon picked up the resource.");

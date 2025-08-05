@@ -7,13 +7,12 @@ public class ChopTreeAction : GoapAction
     private NavMeshAgent _agent;
     private void Awake()
     {
-        _agent = GetComponent<NavMeshAgent>();
+        _agent = transform.root.GetComponent<NavMeshAgent>();
     }
     public override bool IsValid(GameObject agent)
     {
         target = FindClosestWithTag("Tree");
         bool isValid = target != null;
-        if(isValid) _agent.SetDestination(target.transform.position);
         return isValid;
     }
 
@@ -40,9 +39,21 @@ public class ChopTreeAction : GoapAction
 
     public override bool Perform(GameObject agent)
     {
-        if (Vector3.Distance(agent.transform.position, target.transform.position) > 2f) return false;
+        if (target == null)
+        {
+            target = FindClosestWithTag("Tree");
+            if (target == null) return false;
+            _agent.SetDestination(target.transform.position);
+        }
 
+        if (Vector3.Distance(agent.transform.position, target.transform.position) > 2f)
+        {
+            // Still moving
+            return true;
+        }
 
+        // At destination
+        Debug.Log("Collected tree");
         ResourceManager.Instance.Add("OakLog", 1);
         done = true;
         return true;
@@ -52,7 +63,10 @@ public class ChopTreeAction : GoapAction
 
     public override void Reset() => done = false;
 
-    public override HashSet<KeyValuePair<string, object>> Preconditions => new() { };
+    public override HashSet<KeyValuePair<string, object>> Preconditions => new()
+    {
+        new("AtForest", true) // or "AtTree" or whatever name matches your worldState key
+    };
     public override HashSet<KeyValuePair<string, object>> Effects => new()
     {
         new("HasOakLog", true)

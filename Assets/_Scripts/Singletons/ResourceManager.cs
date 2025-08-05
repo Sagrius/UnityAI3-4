@@ -15,6 +15,8 @@ public class ResourceManager : MonoBehaviour
             Instance = this;
         }
         else Destroy(gameObject);
+
+        resources = new Dictionary<string, int>();
     }
 
     public bool GetFact(string key)

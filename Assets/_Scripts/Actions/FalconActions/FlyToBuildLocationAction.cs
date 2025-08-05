@@ -4,6 +4,11 @@ using System.Collections.Generic;
 
 public class FlyToBuildLocationAction : GoapAction
 {
+    private NavMeshAgent _navMesh;
+    private void Awake()
+    {
+        _navMesh = transform.root.GetComponent<NavMeshAgent>();
+    }
     public override HashSet<KeyValuePair<string, object>> Preconditions => new()
     {
         new("CarryingResource", true)
@@ -18,10 +23,10 @@ public class FlyToBuildLocationAction : GoapAction
 
     public override bool Perform(GameObject agent)
     {
-        var falcon = agent.GetComponent<FalconAgent>();
+        var falcon = agent.GetComponent<FalconGoapAgent>();
         if (!done && falcon != null && falcon.buildTarget != null)
         {
-            agent.GetComponent<NavMeshAgent>().SetDestination(falcon.buildTarget.position);
+           _navMesh.SetDestination(falcon.buildTarget.position);
             done = true;
         }
 

@@ -5,7 +5,12 @@ using System.Collections.Generic;
 public class SearchForResourceAction : GoapAction
 {
     public float searchRadius = 15f;
+    private NavMeshAgent _navMesh;
 
+    private void Awake()
+    {
+        _navMesh = transform.root.GetComponent<NavMeshAgent>();
+    }
     public override HashSet<KeyValuePair<string, object>> Preconditions => new()
     {
         new("IsIdle", true)
@@ -29,7 +34,7 @@ public class SearchForResourceAction : GoapAction
 
             if (IsWalkable(targetPos))
             {
-                agent.GetComponent<NavMeshAgent>().SetDestination(targetPos);
+                _navMesh.SetDestination(targetPos);
                 done = true;
             }
         }

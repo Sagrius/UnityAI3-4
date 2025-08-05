@@ -9,11 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 634193207297899632}
-  - component: {fileID: 3815741373458099261}
   - component: {fileID: 7207940340177475720}
+  - component: {fileID: 5189726060543176946}
+  - component: {fileID: 8308503343397002461}
   m_Layer: 0
   m_Name: Falcon
-  m_TagString: Untagged
+  m_TagString: Falcon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -35,23 +36,6 @@ Transform:
   - {fileID: 2145748559580748704}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3815741373458099261
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 795481937628534593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 806cf5b799ba2ea40997d0b2bc26fbd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  availableActions:
-  - {fileID: 1666229467791147252}
-  - {fileID: 58420529744819088}
-  - {fileID: 6733412204543858398}
-  - {fileID: 8760564246519133356}
 --- !u!195 &7207940340177475720
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -74,6 +58,41 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &5189726060543176946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 795481937628534593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd1078f6e199d1e46b64f0016d30035e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  availableActions:
+  - {fileID: 1666229467791147252}
+  - {fileID: 58420529744819088}
+  - {fileID: 6733412204543858398}
+  - {fileID: 8760564246519133356}
+  currentGoalText: 
+  currentActionText: 
+  currentPlanActions: []
+--- !u!114 &8308503343397002461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 795481937628534593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51cd3b1de46c9f4b93bf9bf3d9e2d5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickupTarget: {fileID: 0}
+  buildTarget: {fileID: 0}
+  isCarryingResource: 0
 --- !u!1 &965294491179792364
 GameObject:
   m_ObjectHideFlags: 0

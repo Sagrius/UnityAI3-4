@@ -5,9 +5,12 @@ TagManager:
   serializedVersion: 3
   tags:
   - Tree
-  - Iron
   - Crystal
-  - Friendly
+  - Villager
+  - Mage
+  - Falcon
+  - BuildLocation
+  - Mine
   layers:
   - Default
   - TransparentFX
