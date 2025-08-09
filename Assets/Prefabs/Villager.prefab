@@ -74,6 +74,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   navMeshAgent: {fileID: 7679892938582319726}
+  agentGoal: {fileID: 11400000, guid: d046e5e8796609c46a00a07ee2a0c190, type: 2}
 --- !u!114 &1771881957853079367
 MonoBehaviour:
   m_ObjectHideFlags: 0

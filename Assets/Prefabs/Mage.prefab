@@ -120,6 +120,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2933757741126355458}
   - component: {fileID: 1184759230315416203}
+  - component: {fileID: 2192330410415014734}
   m_Layer: 0
   m_Name: Mage
   m_TagString: Mage
@@ -165,6 +166,20 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &2192330410415014734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5181193516691561466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b742ac7b32d64644097d688fee15e1db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  navMeshAgent: {fileID: 1184759230315416203}
+  agentGoal: {fileID: 11400000, guid: 5af61e1fa845e4b4abab089261c2224f, type: 2}
 --- !u!1 &6386716828680625508
 GameObject:
   m_ObjectHideFlags: 0
