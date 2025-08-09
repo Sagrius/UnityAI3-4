@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4735231178562970842}
   - component: {fileID: 8750956682705693757}
   - component: {fileID: 8294984643301110104}
+  - component: {fileID: 7067369590444083107}
   m_Layer: 0
   m_Name: Iron
   m_TagString: Mine
@@ -108,3 +109,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3, y: 3, z: 3}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7067369590444083107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8806228896396564185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d9e74e2f7549f24a98a44a86bb9f5e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Type: 1

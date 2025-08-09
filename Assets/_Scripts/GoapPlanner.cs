@@ -1,107 +1,85 @@
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class GoapPlanner
 {
-    public Queue<GoapAction> Plan(
-        GameObject agent,
-        HashSet<GoapAction> availableActions,
-        Dictionary<string, object> worldState,
-        HashSet<KeyValuePair<string, object>> goal)
+    public Queue<GoapAction> Plan(GameObject agent, List<GoapAction> availableActions, HashSet<KeyValuePair<string, object>> worldState, HashSet<KeyValuePair<string, object>> goal)
     {
-        List<Node> leaves = new();
-        Node start = new(null, 0, worldState, null);
+        foreach (var action in availableActions) action.DoReset();
 
-        bool success = BuildGraph(start, leaves, availableActions, goal);
+        List<GoapAction> usableActions = availableActions.Where(action => action.CheckProceduralPrecondition(agent)).ToList();
+        List<Node> leaves = new List<Node>();
+        Node start = new Node(null, 0, worldState, null);
 
-        if (!success)
+        if (!BuildGraph(start, leaves, usableActions, goal))
         {
-           // Debug.Log("No plan found.");
             return null;
         }
 
-        // Choose cheapest plan
-        Node cheapest = leaves.OrderBy(n => n.Cost).First();
+        Node cheapest = leaves.OrderBy(leaf => leaf.runningCost).FirstOrDefault();
+        if (cheapest == null) return null;
 
-        // Rebuild path
-        Queue<GoapAction> result = new();
-        while (cheapest != null && cheapest.Action != null)
+        List<GoapAction> result = new List<GoapAction>();
+        Node n = cheapest;
+        while (n != null)
         {
-            result.Enqueue(cheapest.Action);
-            cheapest = cheapest.Parent;
+            if (n.action != null) result.Insert(0, n.action);
+            n = n.parent;
         }
-
-        return new Queue<GoapAction>(result.Reverse());
+        return new Queue<GoapAction>(result);
     }
 
-    private bool BuildGraph(
-        Node parent,
-        List<Node> leaves,
-        HashSet<GoapAction> usableActions,
-        HashSet<KeyValuePair<string, object>> goal)
+    private bool BuildGraph(Node parent, List<Node> leaves, List<GoapAction> usableActions, HashSet<KeyValuePair<string, object>> goal)
     {
         bool foundOne = false;
-
-        foreach (GoapAction action in usableActions)
+        foreach (var action in usableActions)
         {
-            if (!InState(action.Preconditions, parent.State)) continue;
-
-            Dictionary<string, object> newState = new(parent.State);
-
-            foreach (var effect in action.Effects)
+            if (InState(action.Preconditions, parent.state))
             {
-                newState[effect.Key] = effect.Value;
-            }
+                HashSet<KeyValuePair<string, object>> currentState = ApplyState(parent.state, action.Effects);
+                Node node = new Node(parent, parent.runningCost + action.Cost, currentState, action);
 
-            Node node = new(parent, parent.Cost + action.Cost, newState, action);
-
-            if (GoalAchieved(goal, newState))
-            {
-                leaves.Add(node);
-                foundOne = true;
-            }
-            else
-            {
-                HashSet<GoapAction> remaining = new(usableActions);
-                remaining.Remove(action);
-                if (BuildGraph(node, leaves, remaining, goal))
+                if (InState(goal, currentState))
+                {
+                    leaves.Add(node);
                     foundOne = true;
+                }
+                else
+                {
+                    List<GoapAction> subset = ActionSubset(usableActions, action);
+                    if (BuildGraph(node, leaves, subset, goal)) foundOne = true;
+                }
             }
         }
-
         return foundOne;
     }
 
-    private bool InState(HashSet<KeyValuePair<string, object>> test, Dictionary<string, object> state)
+    private bool InState(HashSet<KeyValuePair<string, object>> test, HashSet<KeyValuePair<string, object>> state) => test.All(t => state.Contains(t));
+
+    private HashSet<KeyValuePair<string, object>> ApplyState(HashSet<KeyValuePair<string, object>> currentState, HashSet<KeyValuePair<string, object>> effects)
     {
-        foreach (var pair in test)
+        var newState = new HashSet<KeyValuePair<string, object>>(currentState);
+        foreach (var effect in effects)
         {
-            if (!state.ContainsKey(pair.Key)) return false;
-            if (!state[pair.Key].Equals(pair.Value)) return false;
+            newState.RemoveWhere(s => s.Key == effect.Key);
+            newState.Add(effect);
         }
-        return true;
+        return newState;
     }
 
-    private bool GoalAchieved(HashSet<KeyValuePair<string, object>> goal, Dictionary<string, object> state)
-    {
-        return InState(goal, state);
-    }
+    private List<GoapAction> ActionSubset(List<GoapAction> actions, GoapAction removeMe) => actions.Where(a => !a.Equals(removeMe)).ToList();
 
     private class Node
     {
-        public Node Parent;
-        public float Cost;
-        public Dictionary<string, object> State;
-        public GoapAction Action;
+        public Node parent;
+        public float runningCost;
+        public HashSet<KeyValuePair<string, object>> state;
+        public GoapAction action;
 
-        public Node(Node parent, float cost, Dictionary<string, object> state, GoapAction action)
+        public Node(Node parent, float runningCost, HashSet<KeyValuePair<string, object>> state, GoapAction action)
         {
-            Parent = parent;
-            Cost = cost;
-            State = state;
-            Action = action;
+            this.parent = parent; this.runningCost = runningCost; this.state = state; this.action = action;
         }
     }
 }
-
