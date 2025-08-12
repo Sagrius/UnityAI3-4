@@ -21,6 +21,10 @@ public class CombineArtifactsAction : GoapAction
     public override bool Perform(GoapAgent agent)
     {
         Debug.Log($"<color=green>[{agent.name}] is combining the artifacts... The kingdom is saved!</color>");
+
+        // This is the missing line that sets the final win condition in the WorldState.
+        WorldState.Instance.SetState("combinedArtifactBuilt", true);
+
         SetDone(true);
         return true;
     }

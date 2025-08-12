@@ -27,8 +27,20 @@ public class TaskManager : MonoBehaviour
         inProgressResources.Add("Crystals", 0);
     }
 
+    // In TaskManager.cs
+
     public GoapGoal RequestTask(GoapAgent agent)
     {
+        // === NEW CODE START ===
+        // First, check if the final artifact has been built.
+        // If it has, no more tasks should be assigned to any agent.
+        object finalArtifactState = WorldState.Instance.GetState("combinedArtifactBuilt");
+        if (finalArtifactState is bool && (bool)finalArtifactState)
+        {
+            return null; // Return null to stop assigning tasks.
+        }
+        // === NEW CODE END ===
+
         foreach (var task in allTasks.OrderByDescending(t => t.Priority))
         {
             if (!IsTaskStillNeeded(task))
@@ -40,7 +52,6 @@ public class TaskManager : MonoBehaviour
             {
                 Debug.Log($"<color=yellow>[TaskManager] Assigning needed task '{task.GoalName}' to {agent.name}.</color>");
 
-                // (FIX) When assigning a gathering task, increment the in-progress count.
                 if (task.GoalName.Contains("Logs")) inProgressResources["Logs"]++;
                 if (task.GoalName.Contains("Iron")) inProgressResources["Iron"]++;
                 if (task.GoalName.Contains("Crystals")) inProgressResources["Crystals"]++;
@@ -50,7 +61,6 @@ public class TaskManager : MonoBehaviour
         }
         return null;
     }
-
     // In TaskManager.cs
 
     private bool IsTaskStillNeeded(GoapGoal goal)
@@ -132,15 +142,35 @@ public class TaskManager : MonoBehaviour
         if (task.GoalName.Contains("Crystals")) inProgressResources["Crystals"]--;
     }
 
+    // In TaskManager.cs
+
     public void CompleteTask(GoapGoal task)
     {
         if (task == null) return;
         Debug.Log($"[TaskManager] Task '{task.GoalName}' completed.");
 
-        // (FIX) When a resource is successfully dropped, decrement the in-progress count.
-        // This is now handled by the action itself, but we'll keep this as a fallback.
-        if (task.GoalName.Contains("Logs")) inProgressResources["Logs"]--;
-        if (task.GoalName.Contains("Iron")) inProgressResources["Iron"]--;
-        if (task.GoalName.Contains("Crystals")) inProgressResources["Crystals"]--;
+        // DELETE OR COMMENT OUT THE CODE BLOCK BELOW
+        /*
+        if(task.GoalName.Contains("Logs")) inProgressResources["Logs"]--;
+        if(task.GoalName.Contains("Iron")) inProgressResources["Iron"]--;
+        if(task.GoalName.Contains("Crystals")) inProgressResources["Crystals"]--;
+        */
+    }
+    // In TaskManager.cs
+
+    public void NotifyResourceDelivered(PickupLocation.ResourceType type)
+    {
+        switch (type)
+        {
+            case PickupLocation.ResourceType.Logs:
+                if (inProgressResources["Logs"] > 0) inProgressResources["Logs"]--;
+                break;
+            case PickupLocation.ResourceType.Iron:
+                if (inProgressResources["Iron"] > 0) inProgressResources["Iron"]--;
+                break;
+            case PickupLocation.ResourceType.Crystals:
+                if (inProgressResources["Crystals"] > 0) inProgressResources["Crystals"]--;
+                break;
+        }
     }
 }

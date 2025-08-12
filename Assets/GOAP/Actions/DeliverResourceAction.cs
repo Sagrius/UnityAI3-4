@@ -82,7 +82,7 @@ public class DeliverResourceAction : GoapAction
         // Check if we have arrived at the build location.
         if (Vector3.Distance(agent.transform.position, Target.transform.position) < 3f)
         {
-            // We have arrived. Add the "remembered" resource to the stockpile.
+            // THIS IS THE MISSING PIECE YOU NEED TO ADD
             switch (resourceTypeToDeliver)
             {
                 case PickupLocation.ResourceType.Logs:
@@ -98,7 +98,8 @@ public class DeliverResourceAction : GoapAction
 
             Debug.Log($"<color=orange>[{agent.name}] delivered {resourceAmountToDeliver} {resourceTypeToDeliver}.</color>");
 
-            // The action is now complete.
+            TaskManager.Instance.NotifyResourceDelivered(resourceTypeToDeliver);
+
             SetDone(true);
         }
 
