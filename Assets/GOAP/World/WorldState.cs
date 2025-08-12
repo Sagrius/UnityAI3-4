@@ -46,7 +46,15 @@ public class WorldState : MonoBehaviour
 
     public void AddPickup(PickupLocation pickup) => availablePickups.Add(pickup);
     public void RemovePickup(PickupLocation pickup) => availablePickups.Remove(pickup);
-    public PickupLocation GetClosestPickup(Vector3 position) => availablePickups.OrderBy(p => Vector3.Distance(position, p.transform.position)).FirstOrDefault();
+    // In WorldState.cs
+
+    public PickupLocation GetClosestPickup(Vector3 position)
+    {
+        return availablePickups
+            .Where(p => !p.isClaimed) // Add this LINQ filter
+            .OrderBy(p => Vector3.Distance(position, p.transform.position))
+            .FirstOrDefault();
+    }
 
     public int CountPickupsOfType(PickupLocation.ResourceType type)
     {

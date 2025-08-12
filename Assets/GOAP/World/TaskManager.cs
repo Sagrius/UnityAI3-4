@@ -51,13 +51,33 @@ public class TaskManager : MonoBehaviour
         return null;
     }
 
+    // In TaskManager.cs
+
     private bool IsTaskStillNeeded(GoapGoal goal)
     {
+        var worldState = WorldState.Instance.GetWorldState();
+
+        // 1. Check if the goal's effects are already present in the world state.
+        var goalState = goal.GetGoalState();
+        bool allConditionsMet = true;
+        foreach (var condition in goalState)
+        {
+            if (!worldState.Contains(condition))
+            {
+                allConditionsMet = false;
+                break;
+            }
+        }
+        if (allConditionsMet)
+        {
+            return false; // Goal has already been achieved.
+        }
+
+        // 2. Check resource-specific gathering goals.
         if (goal.GoalName.Contains("Logs"))
         {
             int currentStock = (int)WorldState.Instance.GetState("oakLogsInStockpile");
             int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Logs);
-            // (FIX) Now includes the in-progress count in its calculation.
             return (currentStock + onTheGround + inProgressResources["Logs"]) < totalResourceRequirements["oakLogsInStockpile"];
         }
         if (goal.GoalName.Contains("Iron"))
@@ -73,7 +93,8 @@ public class TaskManager : MonoBehaviour
             return (currentStock + onTheGround + inProgressResources["Crystals"]) < totalResourceRequirements["crystalShardsInStockpile"];
         }
 
-        return ArePreconditionsMet(goal.GetPreconditions(), WorldState.Instance.GetWorldState());
+        // 3. For all other goals (like CombineArtifacts), check their preconditions.
+        return ArePreconditionsMet(goal.GetPreconditions(), worldState);
     }
 
     private bool ArePreconditionsMet(HashSet<KeyValuePair<string, object>> preconditions, HashSet<KeyValuePair<string, object>> worldState)

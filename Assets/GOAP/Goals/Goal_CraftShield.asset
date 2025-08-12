@@ -14,11 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GoalName: Craft Runed Shield
   Priority: 50
-  preconditions:
-  - key: crystalsAreStockpiled
-    value: 1
-  - key: ironIsStockpiled
-    value: 1
+  preconditions: []
   goalState:
   - key: runedShieldBuilt
     value: 1
