@@ -21,6 +21,7 @@ public class GoapAgent : MonoBehaviour
     public GoapGoal CurrentGoal { get; private set; }
     private float planCooldown = 0f;
     private const float PLAN_RATE = 1f;
+    private Vector3 startingPosition;
 
     public List<GoapAction> GetAvailableActions() => availableActions;
 
@@ -30,6 +31,7 @@ public class GoapAgent : MonoBehaviour
         Blackboard = GetComponent<AgentBlackboard>();
         planner = new GoapPlanner();
         currentPlan = new Queue<GoapAction>();
+        startingPosition = transform.position;
 
         availableActions = new List<GoapAction>();
         foreach (string actionName in availableActionNames)
@@ -58,6 +60,11 @@ public class GoapAgent : MonoBehaviour
             {
                 Debug.Log($"[{gameObject.name}] received new goal: {CurrentGoal.GoalName}");
                 FindPlan();
+            }
+            else
+            {
+                Debug.Log($"[{gameObject.name}] No tasks available. Returning home.");
+                NavMeshAgent.SetDestination(startingPosition);
             }
             planCooldown = PLAN_RATE;
         }
@@ -124,7 +131,6 @@ public class GoapAgent : MonoBehaviour
 
         if (inRange)
         {
-            if (NavMeshAgent.hasPath && !NavMeshAgent.pathPending && NavMeshAgent.remainingDistance <= NavMeshAgent.stoppingDistance) NavMeshAgent.isStopped = true;
             if (!currentAction.Perform(this)) AbortPlan("Action failed to perform.");
         }
         else if (currentAction.Target != null)
