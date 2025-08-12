@@ -82,6 +82,11 @@ public class GoapAgent : MonoBehaviour
         var currentState = new HashSet<KeyValuePair<string, object>>(worldState);
         currentState.UnionWith(agentState);
 
+        foreach (var action in availableActions)
+        {
+            action.DoReset();
+        }
+
         var usableActions = availableActions.Where(a => a.CheckProceduralPrecondition(this)).ToList();
         string usableActionsStr = string.Join(", ", usableActions.Select(a => a.ActionName));
         Debug.Log($"[{gameObject.name}] Finding plan for '{CurrentGoal.GoalName}'. Usable actions: [{usableActionsStr}]");
@@ -93,8 +98,6 @@ public class GoapAgent : MonoBehaviour
             Debug.Log($"[{gameObject.name}] Found plan with {plan.Count} steps.");
             currentPlan = plan;
             currentAction = currentPlan.Peek();
-            // (FIX) Do NOT reset the action here. The Target would be lost.
-            // currentAction.DoReset(); 
         }
         else
         {
@@ -114,7 +117,6 @@ public class GoapAgent : MonoBehaviour
             if (currentPlan.Count > 0)
             {
                 currentAction = currentPlan.Peek();
-                // (FIX) Reset the NEXT action just before we use it.
                 currentAction.DoReset();
             }
             else
@@ -151,6 +153,7 @@ public class GoapAgent : MonoBehaviour
         currentAction = null;
         if (CurrentGoal != null)
         {
+            // (FIX) Inform the task manager that the goal failed so it can clear any in-progress counts.
             TaskManager.Instance.FailTask(CurrentGoal);
             CurrentGoal = null;
         }

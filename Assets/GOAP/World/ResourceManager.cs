@@ -7,9 +7,10 @@ public class ResourceManager : MonoBehaviour
     public static ResourceManager Instance { get; private set; }
     public List<ResourceSource> ResourceSources { get; private set; } = new List<ResourceSource>();
     public BuildLocation BuildLocation { get; private set; }
-
-    // (FIX) Add a public field for the prefab, to be assigned in the Inspector.
     public GameObject pickupPrefab;
+
+    // (FIX) A new set to keep track of which nodes are "claimed" by an agent.
+    private HashSet<ResourceSource> claimedSources = new HashSet<ResourceSource>();
 
     void Awake()
     {
@@ -23,6 +24,21 @@ public class ResourceManager : MonoBehaviour
 
     public ResourceSource GetClosestResource(List<ResourceSource> sources, Vector3 position)
     {
-        return sources.OrderBy(s => Vector3.Distance(position, s.transform.position)).FirstOrDefault();
+        // (FIX) Now filters out any sources that are already claimed.
+        return sources
+            .Where(s => !claimedSources.Contains(s))
+            .OrderBy(s => Vector3.Distance(position, s.transform.position))
+            .FirstOrDefault();
+    }
+
+    // (FIX) New methods to allow agents to claim and release resource nodes.
+    public void ClaimResource(ResourceSource source)
+    {
+        claimedSources.Add(source);
+    }
+
+    public void ReleaseResource(ResourceSource source)
+    {
+        claimedSources.Remove(source);
     }
 }

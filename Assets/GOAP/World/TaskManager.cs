@@ -1,39 +1,36 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-
 public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance { get; private set; }
     [SerializeField] private List<GoapGoal> tasks = new List<GoapGoal>();
-    private List<GoapGoal> availableTasks;
+    private List<GoapGoal> allTasks;
 
     private Dictionary<string, int> totalResourceRequirements = new Dictionary<string, int>();
-
-    // (FIX) A new set to track which gathering goals are currently being worked on.
-    private HashSet<GoapGoal> assignedGatheringTasks = new HashSet<GoapGoal>();
+    // (FIX) A new dictionary to track resources that are "in-progress" of being gathered.
+    private Dictionary<string, int> inProgressResources = new Dictionary<string, int>();
 
     void Awake()
     {
         if (Instance != null && Instance != this) Destroy(this);
         else Instance = this;
-        availableTasks = tasks.OrderByDescending(t => t.Priority).ToList();
+        allTasks = new List<GoapGoal>(tasks);
 
         totalResourceRequirements.Add("oakLogsInStockpile", 5);
         totalResourceRequirements.Add("ironIngotsInStockpile", 5);
         totalResourceRequirements.Add("crystalShardsInStockpile", 4);
+
+        // Initialize the in-progress counts to zero.
+        inProgressResources.Add("Logs", 0);
+        inProgressResources.Add("Iron", 0);
+        inProgressResources.Add("Crystals", 0);
     }
 
     public GoapGoal RequestTask(GoapAgent agent)
     {
-        foreach (var task in availableTasks)
+        foreach (var task in allTasks.OrderByDescending(t => t.Priority))
         {
-            // (FIX) If this is a gathering task, check if it's already being worked on.
-            if (IsGatheringGoal(task) && assignedGatheringTasks.Contains(task))
-            {
-                continue; // Skip, another agent is already on it.
-            }
-
             if (!IsTaskStillNeeded(task))
             {
                 continue;
@@ -43,13 +40,11 @@ public class TaskManager : MonoBehaviour
             {
                 Debug.Log($"<color=yellow>[TaskManager] Assigning needed task '{task.GoalName}' to {agent.name}.</color>");
 
-                // (FIX) If it's a gathering goal, "lock" it.
-                if (IsGatheringGoal(task))
-                {
-                    assignedGatheringTasks.Add(task);
-                }
+                // (FIX) When assigning a gathering task, increment the in-progress count.
+                if (task.GoalName.Contains("Logs")) inProgressResources["Logs"]++;
+                if (task.GoalName.Contains("Iron")) inProgressResources["Iron"]++;
+                if (task.GoalName.Contains("Crystals")) inProgressResources["Crystals"]++;
 
-                availableTasks.Remove(task);
                 return task;
             }
         }
@@ -62,19 +57,20 @@ public class TaskManager : MonoBehaviour
         {
             int currentStock = (int)WorldState.Instance.GetState("oakLogsInStockpile");
             int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Logs);
-            return (currentStock + onTheGround) < totalResourceRequirements["oakLogsInStockpile"];
+            // (FIX) Now includes the in-progress count in its calculation.
+            return (currentStock + onTheGround + inProgressResources["Logs"]) < totalResourceRequirements["oakLogsInStockpile"];
         }
         if (goal.GoalName.Contains("Iron"))
         {
             int currentStock = (int)WorldState.Instance.GetState("ironIngotsInStockpile");
             int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Iron);
-            return (currentStock + onTheGround) < totalResourceRequirements["ironIngotsInStockpile"];
+            return (currentStock + onTheGround + inProgressResources["Iron"]) < totalResourceRequirements["ironIngotsInStockpile"];
         }
         if (goal.GoalName.Contains("Crystals"))
         {
             int currentStock = (int)WorldState.Instance.GetState("crystalShardsInStockpile");
             int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Crystals);
-            return (currentStock + onTheGround) < totalResourceRequirements["crystalShardsInStockpile"];
+            return (currentStock + onTheGround + inProgressResources["Crystals"]) < totalResourceRequirements["crystalShardsInStockpile"];
         }
 
         return ArePreconditionsMet(goal.GetPreconditions(), WorldState.Instance.GetWorldState());
@@ -107,36 +103,23 @@ public class TaskManager : MonoBehaviour
     public void FailTask(GoapGoal task)
     {
         if (task == null) return;
-        Debug.LogWarning($"[TaskManager] Task '{task.GoalName}' failed and was returned. Adding back to queue.");
+        Debug.LogWarning($"[TaskManager] Task '{task.GoalName}' failed.");
 
-        // (FIX) "Unlock" the task if it failed.
-        if (IsGatheringGoal(task))
-        {
-            assignedGatheringTasks.Remove(task);
-        }
-
-        availableTasks.Add(task);
-        availableTasks = availableTasks.OrderByDescending(t => t.Priority).ToList();
+        // (FIX) If a gathering task fails, decrement the in-progress count.
+        if (task.GoalName.Contains("Logs")) inProgressResources["Logs"]--;
+        if (task.GoalName.Contains("Iron")) inProgressResources["Iron"]--;
+        if (task.GoalName.Contains("Crystals")) inProgressResources["Crystals"]--;
     }
 
     public void CompleteTask(GoapGoal task)
     {
         if (task == null) return;
-        Debug.Log($"[TaskManager] Task '{task.GoalName}' completed and returned to the pool.");
+        Debug.Log($"[TaskManager] Task '{task.GoalName}' completed.");
 
-        // (FIX) "Unlock" the task upon completion.
-        if (IsGatheringGoal(task))
-        {
-            assignedGatheringTasks.Remove(task);
-        }
-
-        availableTasks.Add(task);
-        availableTasks = availableTasks.OrderByDescending(t => t.Priority).ToList();
-    }
-
-    // A helper method to identify gathering goals.
-    private bool IsGatheringGoal(GoapGoal goal)
-    {
-        return goal.GoalName.Contains("Logs") || goal.GoalName.Contains("Iron") || goal.GoalName.Contains("Crystals");
+        // (FIX) When a resource is successfully dropped, decrement the in-progress count.
+        // This is now handled by the action itself, but we'll keep this as a fallback.
+        if (task.GoalName.Contains("Logs")) inProgressResources["Logs"]--;
+        if (task.GoalName.Contains("Iron")) inProgressResources["Iron"]--;
+        if (task.GoalName.Contains("Crystals")) inProgressResources["Crystals"]--;
     }
 }

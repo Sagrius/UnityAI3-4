@@ -22,6 +22,10 @@ public abstract class PrepareAndDropResourceAction : GoapAction
 
     public override void OnReset()
     {
+        if (targetResourceSource != null)
+        {
+            ResourceManager.Instance.ReleaseResource(targetResourceSource);
+        }
         Target = null;
         targetResourceSource = null;
         collectionTimer = 0.5f;
@@ -38,10 +42,13 @@ public abstract class PrepareAndDropResourceAction : GoapAction
         }
         var sources = ResourceManager.Instance.ResourceSources.Where(s => s.Type == resourceType && s.quantity >= 1).ToList();
         if (sources.Count == 0) return false;
+
         targetResourceSource = ResourceManager.Instance.GetClosestResource(sources, agent.transform.position);
+
         if (targetResourceSource != null)
         {
             Target = targetResourceSource.gameObject;
+            ResourceManager.Instance.ClaimResource(targetResourceSource);
             return true;
         }
         return false;
@@ -51,10 +58,9 @@ public abstract class PrepareAndDropResourceAction : GoapAction
     {
         if (targetResourceSource == null) return false;
 
-        // (FIX) Check if the agent is still moving before starting to collect.
         if (agent.NavMeshAgent.pathPending || agent.NavMeshAgent.remainingDistance > agent.NavMeshAgent.stoppingDistance)
         {
-            return true; // Still moving, action is in progress.
+            return true;
         }
 
         if (!isCollecting)
@@ -78,6 +84,8 @@ public abstract class PrepareAndDropResourceAction : GoapAction
         WorldState.Instance.AddPickup(pickupData);
 
         Debug.Log($"[{agent.name}] finished preparing and dropped 1 {pickupType}.");
+
+        ResourceManager.Instance.ReleaseResource(targetResourceSource);
 
         SetDone(true);
         return true;

@@ -19,12 +19,6 @@ public class WorldState : MonoBehaviour
         SetState("enchantedStaffBuilt", false);
         SetState("runedShieldBuilt", false);
         SetState("combinedArtifactBuilt", false);
-
-        // (FIX) The "...ReadyForPickup" flags are no longer needed with the new TaskManager logic.
-        // We can remove them to simplify the state.
-        // SetState("logsReadyForPickup", false);
-        // SetState("ironReadyForPickup", false);
-        // SetState("crystalsReadyForPickup", false);
     }
 
     public HashSet<KeyValuePair<string, object>> GetWorldState()
@@ -54,7 +48,6 @@ public class WorldState : MonoBehaviour
     public void RemovePickup(PickupLocation pickup) => availablePickups.Remove(pickup);
     public PickupLocation GetClosestPickup(Vector3 position) => availablePickups.OrderBy(p => Vector3.Distance(position, p.transform.position)).FirstOrDefault();
 
-    // (FIX) New method to count pickups currently on the ground.
     public int CountPickupsOfType(PickupLocation.ResourceType type)
     {
         return availablePickups.Count(p => p.Type == type);
