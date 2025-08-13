@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3549654386132110009}
   - component: {fileID: 7679892938582319726}
   - component: {fileID: 2997485996178477605}
-  - component: {fileID: 3530849752349561340}
   m_Layer: 0
   m_Name: Villager
   m_TagString: Villager
@@ -69,22 +68,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b742ac7b32d64644097d688fee15e1db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  availableActionNames:
-  - PrepareLogsAction
-  - PrepareIronAction
-  - PrepareCrystalsAction
---- !u!114 &3530849752349561340
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1817550379402266319}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 190f0613b8fe9e44b84252a98020d540, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  availableActions:
+  - {fileID: 11400000, guid: a14cd28c92f462c45a5781c4860b9a61, type: 2}
+  - {fileID: 11400000, guid: 218ebcc77e1ac7d4983b17b772acd05f, type: 2}
+  - {fileID: 11400000, guid: a8086da6877fb1a459de270f31ea04ac, type: 2}
 --- !u!1 &2983579928658668156
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class GoapPlanner
 {
     public Queue<GoapAction> Plan(GoapAgent agent, List<GoapAction> availableActions, HashSet<KeyValuePair<string, object>> worldState, HashSet<KeyValuePair<string, object>> goal)
     {
-        foreach (var action in availableActions) action.DoReset();
-
-        List<GoapAction> usableActions = availableActions.Where(action => action.CheckProceduralPrecondition(agent)).ToList();
+        List<GoapAction> usableActions = availableActions;
         List<Node> leaves = new List<Node>();
         Node start = new Node(null, 0, worldState, null);
 
@@ -21,7 +20,14 @@ public class GoapPlanner
         Node n = cheapest;
         while (n != null)
         {
-            if (n.action != null) result.Insert(0, n.action);
+            if (n.action != null)
+            {
+                // *** THE FIX ***
+                // We instantiate a copy of the action asset. This gives the agent
+                // its own unique instance to store runtime data like 'Target',
+                // preventing conflicts with other agents using the same action asset.
+                result.Insert(0, ScriptableObject.Instantiate(n.action));
+            }
             n = n.parent;
         }
         return new Queue<GoapAction>(result);

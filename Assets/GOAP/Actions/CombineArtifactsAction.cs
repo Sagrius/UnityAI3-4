@@ -1,12 +1,16 @@
 using UnityEngine;
+
+[CreateAssetMenu(fileName = "CombineArtifactsAction", menuName = "GOAP/Actions/Combine Artifacts")]
 public class CombineArtifactsAction : GoapAction
 {
-    public CombineArtifactsAction()
+    void OnEnable()
     {
         ActionName = "Combine Artifacts";
-        AddPrecondition("enchantedStaffBuilt", true);
-        AddPrecondition("runedShieldBuilt", true);
-        AddEffect("combinedArtifactBuilt", true);
+        Preconditions.Clear();
+        Effects.Clear();
+        AddPrecondition(WorldStateKeys.EnchantedStaffBuilt, true);
+        AddPrecondition(WorldStateKeys.RunedShieldBuilt, true);
+        AddEffect(WorldStateKeys.CombinedArtifactBuilt, true);
     }
 
     public override void OnReset() { Target = null; }
@@ -14,6 +18,14 @@ public class CombineArtifactsAction : GoapAction
 
     public override bool CheckProceduralPrecondition(GoapAgent agent)
     {
+        // This action's preconditions are handled by the planner, so we just need to know
+        // if the build location exists.
+        return ResourceManager.Instance.BuildLocation != null;
+    }
+
+    public override bool SetupAction(GoapAgent agent)
+    {
+        // For execution, set the target to the build location.
         Target = ResourceManager.Instance.BuildLocation.gameObject;
         return Target != null;
     }
@@ -21,10 +33,7 @@ public class CombineArtifactsAction : GoapAction
     public override bool Perform(GoapAgent agent)
     {
         Debug.Log($"<color=green>[{agent.name}] is combining the artifacts... The kingdom is saved!</color>");
-
-        // This is the missing line that sets the final win condition in the WorldState.
-        WorldState.Instance.SetState("combinedArtifactBuilt", true);
-
+        WorldState.Instance.SetState(WorldStateKeys.CombinedArtifactBuilt, true);
         SetDone(true);
         return true;
     }

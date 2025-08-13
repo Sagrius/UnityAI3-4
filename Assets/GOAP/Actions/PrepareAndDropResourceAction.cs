@@ -1,31 +1,49 @@
 using System.Linq;
 using UnityEngine;
 
-public abstract class PrepareAndDropResourceAction : GoapAction
+[CreateAssetMenu(fileName = "PrepareResourceAction", menuName = "GOAP/Actions/Prepare Resource")]
+public class PrepareAndDropResourceAction : GoapAction
 {
-    protected ResourceSource.ResourceType resourceType;
-    protected PickupLocation.ResourceType pickupType;
-    protected string goalEffectKey;
-    private ResourceSource targetResourceSource;
+    public enum ResourceToPrepare { Logs, Iron, Crystals }
+    [Tooltip("The type of resource this action will gather and prepare.")]
+    public ResourceToPrepare resource;
 
-    private float collectionTimer = 0.5f;
-    private bool isCollecting = false;
+    private ResourceSource.ResourceType resourceSourceType;
+    private PickupLocation.ResourceType pickupType;
+    private string effectKey;
 
-    public PrepareAndDropResourceAction(ResourceSource.ResourceType resType, PickupLocation.ResourceType pickType, string effectKey)
+    private float collectionTimer;
+    private bool isCollecting;
+    [System.NonSerialized] private ResourceSource targetResourceSource;
+
+    void OnEnable()
     {
-        resourceType = resType;
-        pickupType = pickType;
-        goalEffectKey = effectKey;
-        ActionName = $"Prepare {pickType}";
-        AddEffect(goalEffectKey, true);
+        switch (resource)
+        {
+            case ResourceToPrepare.Logs:
+                resourceSourceType = ResourceSource.ResourceType.Tree;
+                pickupType = PickupLocation.ResourceType.Logs;
+                effectKey = WorldStateKeys.LogsReadyForPickup;
+                break;
+            case ResourceToPrepare.Iron:
+                resourceSourceType = ResourceSource.ResourceType.Mine;
+                pickupType = PickupLocation.ResourceType.Iron;
+                effectKey = WorldStateKeys.IronReadyForPickup;
+                break;
+            case ResourceToPrepare.Crystals:
+                resourceSourceType = ResourceSource.ResourceType.CrystalCavern;
+                pickupType = PickupLocation.ResourceType.Crystals;
+                effectKey = WorldStateKeys.CrystalsReadyForPickup;
+                break;
+        }
+        ActionName = $"Prepare {pickupType}";
+        Effects.Clear();
+        AddEffect(effectKey, true);
     }
 
     public override void OnReset()
     {
-        if (targetResourceSource != null)
-        {
-            ResourceManager.Instance.ReleaseResource(targetResourceSource);
-        }
+        if (targetResourceSource != null) ResourceManager.Instance.ReleaseResource(targetResourceSource);
         Target = null;
         targetResourceSource = null;
         collectionTimer = 0.5f;
@@ -35,22 +53,23 @@ public abstract class PrepareAndDropResourceAction : GoapAction
 
     public override bool CheckProceduralPrecondition(GoapAgent agent)
     {
-        if (ResourceManager.Instance.pickupPrefab == null)
-        {
-            Debug.LogError("PickupPrefab has not been assigned in the ResourceManager!");
-            return false;
-        }
-        var sources = ResourceManager.Instance.ResourceSources.Where(s => s.Type == resourceType && s.quantity >= 1).ToList();
-        if (sources.Count == 0) return false;
+        // For planning, just check if any resource of this type exists.
+        var sources = ResourceManager.Instance.ResourceSources.Where(s => s.Type == resourceSourceType && s.quantity >= 1).ToList();
+        return sources.Count > 0;
+    }
 
-        targetResourceSource = ResourceManager.Instance.GetClosestResource(sources, agent.transform.position);
+    public override bool SetupAction(GoapAgent agent)
+    {
+        // For execution, find the closest resource and claim it.
+        var sources = ResourceManager.Instance.ResourceSources.Where(s => s.Type == resourceSourceType && s.quantity >= 1).ToList();
+        targetResourceSource = ResourceManager.Instance.FindAndClaimClosestResource(sources, agent.transform.position);
 
         if (targetResourceSource != null)
         {
             Target = targetResourceSource.gameObject;
-            ResourceManager.Instance.ClaimResource(targetResourceSource);
             return true;
         }
+        // If we fail to find and claim a resource here, the action setup fails.
         return false;
     }
 
@@ -58,49 +77,37 @@ public abstract class PrepareAndDropResourceAction : GoapAction
     {
         if (targetResourceSource == null) return false;
 
-        if (agent.NavMeshAgent.pathPending || agent.NavMeshAgent.remainingDistance > agent.NavMeshAgent.stoppingDistance)
-        {
-            return true;
-        }
+        if (agent.NavMeshAgent.pathPending || agent.NavMeshAgent.remainingDistance > agent.NavMeshAgent.stoppingDistance) return true;
 
-        if (!isCollecting)
-        {
-            isCollecting = true;
-            Debug.Log($"[{agent.name}] started collecting 1 {pickupType}.");
-        }
+        if (!isCollecting) isCollecting = true;
 
         collectionTimer -= Time.deltaTime;
-        if (collectionTimer > 0)
-        {
-            return true;
-        }
+        if (collectionTimer > 0) return true;
 
         targetResourceSource.quantity -= 1;
-        GameObject pickup = GameObject.Instantiate(ResourceManager.Instance.pickupPrefab, agent.transform.position, Quaternion.identity);
 
+        GameObject pickup = GameObject.Instantiate(ResourceManager.Instance.pickupPrefab, agent.transform.position, Quaternion.identity);
         var pickupData = pickup.GetComponent<PickupLocation>();
         pickupData.Type = pickupType;
         pickupData.Amount = 1;
         WorldState.Instance.AddPickup(pickupData);
 
-        Debug.Log($"[{agent.name}] finished preparing and dropped 1 {pickupType}.");
-
-        ResourceManager.Instance.ReleaseResource(targetResourceSource);
+        // *** THE FIX ***
+        // Check if the resource is now empty.
+        if (targetResourceSource.quantity <= 0)
+        {
+            Debug.Log($"[{agent.name}] depleted {targetResourceSource.name}. Removing from world.");
+            // Remove it from the manager and destroy the object.
+            ResourceManager.Instance.RemoveResourceSource(targetResourceSource);
+            Destroy(targetResourceSource.gameObject);
+        }
+        else
+        {
+            // If it's not empty, just release the claim so another agent can use it.
+            ResourceManager.Instance.ReleaseResource(targetResourceSource);
+        }
 
         SetDone(true);
         return true;
     }
-}
-
-public class PrepareLogsAction : PrepareAndDropResourceAction
-{
-    public PrepareLogsAction() : base(ResourceSource.ResourceType.Tree, PickupLocation.ResourceType.Logs, "logsReadyForPickup") { }
-}
-public class PrepareIronAction : PrepareAndDropResourceAction
-{
-    public PrepareIronAction() : base(ResourceSource.ResourceType.Mine, PickupLocation.ResourceType.Iron, "ironReadyForPickup") { }
-}
-public class PrepareCrystalsAction : PrepareAndDropResourceAction
-{
-    public PrepareCrystalsAction() : base(ResourceSource.ResourceType.CrystalCavern, PickupLocation.ResourceType.Crystals, "crystalsReadyForPickup") { }
 }

@@ -178,8 +178,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b742ac7b32d64644097d688fee15e1db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  navMeshAgent: {fileID: 1184759230315416203}
-  agentGoal: {fileID: 11400000, guid: 5af61e1fa845e4b4abab089261c2224f, type: 2}
+  availableActions:
+  - {fileID: 11400000, guid: f2edeec3c4eff0f42a756365e1eb7a2e, type: 2}
+  - {fileID: 11400000, guid: 47cd92077119a3f498fed5fe26dd6366, type: 2}
+  - {fileID: 11400000, guid: 35f6adfd399f5c94c97414a5b1250bc2, type: 2}
 --- !u!1 &6386716828680625508
 GameObject:
   m_ObjectHideFlags: 0

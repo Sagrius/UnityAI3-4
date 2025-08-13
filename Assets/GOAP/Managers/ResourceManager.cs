@@ -9,7 +9,6 @@ public class ResourceManager : MonoBehaviour
     public BuildLocation BuildLocation { get; private set; }
     public GameObject pickupPrefab;
 
-    // (FIX) A new set to keep track of which nodes are "claimed" by an agent.
     private HashSet<ResourceSource> claimedSources = new HashSet<ResourceSource>();
 
     void Awake()
@@ -19,26 +18,31 @@ public class ResourceManager : MonoBehaviour
 
         ResourceSources = FindObjectsOfType<ResourceSource>().ToList();
         BuildLocation = FindObjectOfType<BuildLocation>();
-        Debug.Log($"ResourceManager Initialized: Found {ResourceSources.Count} total resource sources.");
     }
 
-    public ResourceSource GetClosestResource(List<ResourceSource> sources, Vector3 position)
+    public ResourceSource FindAndClaimClosestResource(List<ResourceSource> sources, Vector3 position)
     {
-        // (FIX) Now filters out any sources that are already claimed.
-        return sources
+        ResourceSource closestSource = sources
             .Where(s => !claimedSources.Contains(s))
             .OrderBy(s => Vector3.Distance(position, s.transform.position))
             .FirstOrDefault();
+
+        if (closestSource != null)
+        {
+            ClaimResource(closestSource);
+        }
+        return closestSource;
     }
 
-    // (FIX) New methods to allow agents to claim and release resource nodes.
-    public void ClaimResource(ResourceSource source)
-    {
-        claimedSources.Add(source);
-    }
+    public void ClaimResource(ResourceSource source) => claimedSources.Add(source);
+    public void ReleaseResource(ResourceSource source) => claimedSources.Remove(source);
 
-    public void ReleaseResource(ResourceSource source)
+    // NEW METHOD
+    public void RemoveResourceSource(ResourceSource source)
     {
-        claimedSources.Remove(source);
+        if (ResourceSources.Contains(source))
+        {
+            ResourceSources.Remove(source);
+        }
     }
 }

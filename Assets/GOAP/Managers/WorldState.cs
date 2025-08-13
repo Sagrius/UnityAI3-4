@@ -13,12 +13,12 @@ public class WorldState : MonoBehaviour
         if (Instance != null && Instance != this) Destroy(gameObject);
         else Instance = this;
 
-        SetState("oakLogsInStockpile", 0);
-        SetState("ironIngotsInStockpile", 0);
-        SetState("crystalShardsInStockpile", 0);
-        SetState("enchantedStaffBuilt", false);
-        SetState("runedShieldBuilt", false);
-        SetState("combinedArtifactBuilt", false);
+        SetState(WorldStateKeys.LogsInStockpile, 0);
+        SetState(WorldStateKeys.IronInStockpile, 0);
+        SetState(WorldStateKeys.CrystalsInStockpile, 0);
+        SetState(WorldStateKeys.EnchantedStaffBuilt, false);
+        SetState(WorldStateKeys.RunedShieldBuilt, false);
+        SetState(WorldStateKeys.CombinedArtifactBuilt, false);
     }
 
     public HashSet<KeyValuePair<string, object>> GetWorldState()
@@ -46,15 +46,7 @@ public class WorldState : MonoBehaviour
 
     public void AddPickup(PickupLocation pickup) => availablePickups.Add(pickup);
     public void RemovePickup(PickupLocation pickup) => availablePickups.Remove(pickup);
-    // In WorldState.cs
-
-    public PickupLocation GetClosestPickup(Vector3 position)
-    {
-        return availablePickups
-            .Where(p => !p.isClaimed) // Add this LINQ filter
-            .OrderBy(p => Vector3.Distance(position, p.transform.position))
-            .FirstOrDefault();
-    }
+    public PickupLocation GetClosestPickup(Vector3 position) => availablePickups.Where(p => !p.isClaimed).OrderBy(p => Vector3.Distance(position, p.transform.position)).FirstOrDefault();
 
     public int CountPickupsOfType(PickupLocation.ResourceType type)
     {
