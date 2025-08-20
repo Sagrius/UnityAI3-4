@@ -23,7 +23,6 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     [SerializeField] private float MaxHealth = 100;
     [SerializeField] private float currenthealth = 100;
-    private bool WaitingToSerialize = true;
     private bool IsAlive = true;
 
     private Transform closestEnemyLocation;
@@ -44,7 +43,7 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     public void CalculateNN()
     {
-        if (WaitingToSerialize) return;
+        //if (WaitingToSerialize) return;
         SetInput(new float[] { GetHealth(), AsessThreats(), GetDistanceToEnemy(),GetHealingPotionAmount(), DistanceToHealing()});
         Evaluate();
         
@@ -113,7 +112,7 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     void Update()
     {
-        if (WaitingToSerialize) return;
+        //if (WaitingToSerialize) return;
 
         if (planCooldown > 0) planCooldown -= Time.deltaTime;
 
