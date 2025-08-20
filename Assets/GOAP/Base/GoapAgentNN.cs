@@ -61,6 +61,7 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     private float DistanceToHealing()
     {
+        if (closestPotionLocation == null) return Mathf.Infinity;
         return (closestPotionLocation.position - transform.position).magnitude;
     }
 
@@ -85,6 +86,7 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     private float GetDistanceToEnemy()
     {
+        if (closestEnemyLocation == null) return Mathf.Infinity;
         return (closestEnemyLocation.position - transform.position).magnitude;
     }
 
