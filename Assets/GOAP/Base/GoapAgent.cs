@@ -150,7 +150,7 @@ public class GoapAgent : MonoBehaviour
 
     public void AbortPlan(string reason)
     {
-        Debug.LogError($"[{gameObject.name}] Plan Aborted: {reason}. Returning task '{CurrentGoal?.GoalName ?? "None"}'.");
+        Debug.LogWarning($"[{gameObject.name}] Plan Aborted: {reason}. Returning task '{CurrentGoal?.GoalName ?? "None"}'.");
 
         foreach (var action in currentPlan)
         {
