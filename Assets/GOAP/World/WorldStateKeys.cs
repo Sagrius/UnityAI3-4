@@ -14,11 +14,4 @@ public static class WorldStateKeys
     public const string IronReadyForPickup = "ironReadyForPickup";
     public const string CrystalsReadyForPickup = "crystalsReadyForPickup";
     public const string ResourceDelivered = "resourceDelivered";
-
-    // --- COMBAT ---
-    public const string IsSafe = "isSafe";
-    public const string HasTarget = "hasTarget";
-    public const string TargetInAttackRange = "targetInAttackRange";
-    public const string TargetAttacked = "targetAttacked";
-    public const string IsHealed = "isHealed";
 }

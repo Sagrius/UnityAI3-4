@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 634193207297899632}
   - component: {fileID: 7207940340177475720}
   - component: {fileID: 8320324696526739824}
-  - component: {fileID: 3484658136419010706}
   m_Layer: 0
   m_Name: Falcon
   m_TagString: Falcon
@@ -71,23 +70,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   availableActions:
   - {fileID: 11400000, guid: c63b15d5b03f027408e5c185f93e9632, type: 2}
---- !u!114 &3484658136419010706
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 795481937628534593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 175237d625f8dd643b68bacdb5ebb4e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 100
-  attackPower: 10
-  healingThreshold: 50
-  agentType: 1
 --- !u!1 &965294491179792364
 GameObject:
   m_ObjectHideFlags: 0

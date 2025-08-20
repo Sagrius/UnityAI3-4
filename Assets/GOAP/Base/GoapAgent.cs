@@ -4,13 +4,9 @@ using UnityEngine;
 using System.Linq;
 
 [RequireComponent(typeof(NavMeshAgent))]
-[RequireComponent(typeof(CombatStats))]
 public class GoapAgent : MonoBehaviour
 {
     public NavMeshAgent NavMeshAgent { get; private set; }
-    public CombatStats CombatStats { get; private set; }
-    public GameObject CurrentTarget { get; set; }
-
     private GoapPlanner planner;
     private Queue<GoapAction> currentPlan;
     private GoapAction currentAction;
@@ -28,7 +24,6 @@ public class GoapAgent : MonoBehaviour
     void Awake()
     {
         NavMeshAgent = GetComponent<NavMeshAgent>();
-        CombatStats = GetComponent<CombatStats>();
         planner = new GoapPlanner();
         currentPlan = new Queue<GoapAction>();
         startingPosition = transform.position;
@@ -36,20 +31,6 @@ public class GoapAgent : MonoBehaviour
 
     void Update()
     {
-        // *** THE FIX: High-Priority Interrupt ***
-        // If the agent is in danger, it should drop everything and react.
-        if (CombatStats.IsUnderAttack || CombatStats.currentHealth < CombatStats.healingThreshold)
-        {
-            // Check if the current plan is already a survival plan.
-            bool isSurvivalPlan = currentAction is AttackAgentAction || currentAction is RetreatAction || currentAction is GetHealingPotionAction;
-
-            if (currentAction != null && !isSurvivalPlan)
-            {
-                Debug.LogWarning($"[{gameObject.name}] is under duress and aborting current task: {currentAction.ActionName}");
-                AbortPlan("Emergency override: Under attack or low health.");
-            }
-        }
-
         if (planCooldown > 0) planCooldown -= Time.deltaTime;
 
         if (CurrentGoal == null && planCooldown <= 0)
@@ -78,6 +59,7 @@ public class GoapAgent : MonoBehaviour
         var worldState = WorldState.Instance.GetWorldState();
         var currentState = new HashSet<KeyValuePair<string, object>>(worldState);
 
+        // We still call DoReset on the template assets.
         foreach (var action in availableActions)
         {
             action.DoReset();
@@ -91,6 +73,8 @@ public class GoapAgent : MonoBehaviour
         {
             currentPlan = plan;
             currentAction = currentPlan.Peek();
+            // *** THE FIX ***
+            // Setup the first action in the plan.
             if (!currentAction.SetupAction(this))
             {
                 AbortPlan($"Failed to setup first action: {currentAction.ActionName}");
@@ -115,10 +99,12 @@ public class GoapAgent : MonoBehaviour
             if (currentPlan.Count > 0)
             {
                 currentAction = currentPlan.Peek();
+                // *** THE FIX ***
+                // Setup the next action in the plan.
                 if (!currentAction.SetupAction(this))
                 {
                     AbortPlan($"Failed to setup action: {currentAction.ActionName}");
-                    return;
+                    return; // Stop execution this frame
                 }
             }
             else
@@ -144,6 +130,7 @@ public class GoapAgent : MonoBehaviour
         }
         else
         {
+            // This case should now be caught by a failing SetupAction call.
             AbortPlan("Action requires a target, but target is null.");
         }
     }

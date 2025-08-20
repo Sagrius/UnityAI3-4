@@ -5,19 +5,13 @@ public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance { get; private set; }
     [SerializeField] private List<GoapGoal> tasks = new List<GoapGoal>();
+    [Tooltip("A list of all possible items that can be crafted in the game.")]
     [SerializeField] private List<CraftingRecipe> allCraftingRecipes = new List<CraftingRecipe>();
-
-    [Header("Spawning")]
-    [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private GameObject healthPotionPrefab;
-    [SerializeField] private List<Transform> spawnPoints;
-    [SerializeField] private int numberOfEnemies = 4;
-    [SerializeField] private int maxPotions = 3;
-    [SerializeField] private float potionSpawnRate = 15f;
 
     private List<GoapGoal> allTasks;
     private Dictionary<PickupLocation.ResourceType, int> inProgressResources = new Dictionary<PickupLocation.ResourceType, int>();
     private Dictionary<string, int> totalResourceDemand = new Dictionary<string, int>();
+
 
     void Awake()
     {
@@ -25,39 +19,10 @@ public class TaskManager : MonoBehaviour
         else Instance = this;
         allTasks = new List<GoapGoal>(tasks);
 
+        // Initialize with enums for type safety
         inProgressResources.Add(PickupLocation.ResourceType.Logs, 0);
         inProgressResources.Add(PickupLocation.ResourceType.Iron, 0);
         inProgressResources.Add(PickupLocation.ResourceType.Crystals, 0);
-    }
-
-    void Start()
-    {
-        for (int i = 0; i < numberOfEnemies; i++)
-        {
-            if (enemyPrefab != null && spawnPoints.Count > 0)
-            {
-                Instantiate(enemyPrefab, spawnPoints[Random.Range(0, spawnPoints.Count)].position, Quaternion.identity);
-            }
-        }
-        StartCoroutine(SpawnPotionsRoutine());
-    }
-
-    private System.Collections.IEnumerator SpawnPotionsRoutine()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(potionSpawnRate);
-
-            int currentPotionCount = FindObjectsOfType<HealthPotion>().Length;
-            if (currentPotionCount < maxPotions)
-            {
-                if (healthPotionPrefab != null && spawnPoints.Count > 0)
-                {
-                    Debug.Log("Spawning a new health potion.");
-                    Instantiate(healthPotionPrefab, spawnPoints[Random.Range(0, spawnPoints.Count)].position, Quaternion.identity);
-                }
-            }
-        }
     }
 
     void Update()
@@ -71,7 +36,10 @@ public class TaskManager : MonoBehaviour
         foreach (var recipe in allCraftingRecipes)
         {
             object itemState = WorldState.Instance.GetState(recipe.craftedItemKey);
-            if (itemState is bool && (bool)itemState) continue;
+            if (itemState is bool && (bool)itemState)
+            {
+                continue;
+            }
 
             foreach (var cost in recipe.requiredResources)
             {
@@ -90,82 +58,31 @@ public class TaskManager : MonoBehaviour
     public GoapGoal RequestTask(GoapAgent agent)
     {
         object finalArtifactState = WorldState.Instance.GetState(WorldStateKeys.CombinedArtifactBuilt);
-        if (finalArtifactState is bool && (bool)finalArtifactState) return null;
-
-        // *** THE FIX: Self-Preservation Override ***
-        if (agent.CombatStats.IsUnderAttack || agent.CombatStats.currentHealth < 30)
+        if (finalArtifactState is bool && (bool)finalArtifactState)
         {
-            var retreatGoal = allTasks.FirstOrDefault(g => g.GoalName == "Retreat");
-            if (retreatGoal != null && IsAgentCapable(agent, retreatGoal)) return retreatGoal;
-
-            var attackGoal = allTasks.FirstOrDefault(g => g.GoalName == "Attack Target");
-            if (attackGoal != null && IsAgentCapable(agent, attackGoal)) return attackGoal;
-        }
-
-        if (agent.CombatStats.currentHealth < agent.CombatStats.healingThreshold)
-        {
-            var healGoal = allTasks.FirstOrDefault(g => g.GoalName == "Heal");
-            if (healGoal != null && IsAgentCapable(agent, healGoal)) return healGoal;
-        }
-
-        if (IsVillager(agent))
-        {
-            return GetFocusedVillagerTask(agent);
+            return null;
         }
 
         foreach (var task in allTasks.OrderByDescending(t => t.Priority))
         {
-            if (IsVillagerResourceTask(task)) continue;
-
-            if (IsTaskStillNeeded(task) && IsAgentCapable(agent, task))
+            if (!IsTaskStillNeeded(task))
             {
+                continue;
+            }
+
+            if (IsAgentCapable(agent, task))
+            {
+                Debug.Log($"<color=yellow>[TaskManager] Assigning needed task '{task.GoalName}' to {agent.name}.</color>");
+
+                // Track the assigned task to prevent over-assignment
+                if (task.GoalName.Contains("Logs")) inProgressResources[PickupLocation.ResourceType.Logs]++;
+                if (task.GoalName.Contains("Iron")) inProgressResources[PickupLocation.ResourceType.Iron]++;
+                if (task.GoalName.Contains("Crystals")) inProgressResources[PickupLocation.ResourceType.Crystals]++;
+
                 return task;
             }
         }
         return null;
-    }
-
-    private GoapGoal GetFocusedVillagerTask(GoapAgent agent)
-    {
-        PickupLocation.ResourceType? priorityType = GetPriorityResourceType();
-        if (!priorityType.HasValue) return null;
-
-        ResourceSource.ResourceType sourceType = GetSourceTypeForResourceType(priorityType.Value);
-        int unclaimedSources = ResourceManager.Instance.GetUnclaimedResourceCount(sourceType);
-
-        if (unclaimedSources > 0)
-        {
-            GoapGoal task = GetGoalForResourceType(priorityType.Value);
-            if (task != null && IsAgentCapable(agent, task))
-            {
-                inProgressResources[priorityType.Value]++;
-                return task;
-            }
-        }
-        return null;
-    }
-
-    private PickupLocation.ResourceType? GetPriorityResourceType()
-    {
-        int logDeficit = GetStableDeficit(WorldStateKeys.LogsInStockpile, PickupLocation.ResourceType.Logs);
-        int ironDeficit = GetStableDeficit(WorldStateKeys.IronInStockpile, PickupLocation.ResourceType.Iron);
-        int crystalDeficit = GetStableDeficit(WorldStateKeys.CrystalsInStockpile, PickupLocation.ResourceType.Crystals);
-
-        if (logDeficit <= 0 && ironDeficit <= 0 && crystalDeficit <= 0) return null;
-
-        if (logDeficit > 0) return PickupLocation.ResourceType.Logs;
-        if (ironDeficit > 0) return PickupLocation.ResourceType.Iron;
-        if (crystalDeficit > 0) return PickupLocation.ResourceType.Crystals;
-
-        return null;
-    }
-
-    private int GetStableDeficit(string resourceKey, PickupLocation.ResourceType type)
-    {
-        totalResourceDemand.TryGetValue(resourceKey, out int demand);
-        int currentStock = (int)WorldState.Instance.GetState(resourceKey);
-        int onTheGround = WorldState.Instance.CountPickupsOfType(type);
-        return demand - (currentStock + onTheGround);
     }
 
     private bool IsTaskStillNeeded(GoapGoal goal)
@@ -182,45 +99,36 @@ public class TaskManager : MonoBehaviour
                 break;
             }
         }
-        if (allConditionsMet) return false;
-
-        return true;
-    }
-
-    private bool IsVillager(GoapAgent agent) => agent.GetAvailableActions().Any(a => a is PrepareAndDropResourceAction);
-    private bool IsVillagerResourceTask(GoapGoal goal) => goal.GoalName.Contains("Logs") || goal.GoalName.Contains("Iron") || goal.GoalName.Contains("Crystals");
-    private GoapGoal GetGoalForResourceType(PickupLocation.ResourceType type)
-    {
-        if (type == PickupLocation.ResourceType.Logs) return allTasks.FirstOrDefault(g => g.GoalName.Contains("Logs"));
-        if (type == PickupLocation.ResourceType.Iron) return allTasks.FirstOrDefault(g => g.GoalName.Contains("Iron"));
-        if (type == PickupLocation.ResourceType.Crystals) return allTasks.FirstOrDefault(g => g.GoalName.Contains("Crystals"));
-        return null;
-    }
-    private PickupLocation.ResourceType? GetResourceTypeForGoal(GoapGoal goal)
-    {
-        if (goal.GoalName.Contains("Logs")) return PickupLocation.ResourceType.Logs;
-        if (goal.GoalName.Contains("Iron")) return PickupLocation.ResourceType.Iron;
-        if (goal.GoalName.Contains("Crystals")) return PickupLocation.ResourceType.Crystals;
-        return null;
-    }
-    private ResourceSource.ResourceType GetSourceTypeForResourceType(PickupLocation.ResourceType resType)
-    {
-        switch (resType)
+        if (allConditionsMet)
         {
-            case PickupLocation.ResourceType.Logs: return ResourceSource.ResourceType.Tree;
-            case PickupLocation.ResourceType.Iron: return ResourceSource.ResourceType.Mine;
-            case PickupLocation.ResourceType.Crystals: return ResourceSource.ResourceType.CrystalCavern;
-            default: throw new System.ArgumentOutOfRangeException();
+            return false;
         }
-    }
-    private string GetKeyForResourceType(PickupLocation.ResourceType type)
-    {
-        if (type == PickupLocation.ResourceType.Logs) return WorldStateKeys.LogsInStockpile;
-        if (type == PickupLocation.ResourceType.Iron) return WorldStateKeys.IronInStockpile;
-        if (type == PickupLocation.ResourceType.Crystals) return WorldStateKeys.CrystalsInStockpile;
-        return "";
-    }
 
+        // Check resource goals against dynamic demand
+        if (goal.GoalName.Contains("Logs"))
+        {
+            int currentStock = (int)WorldState.Instance.GetState(WorldStateKeys.LogsInStockpile);
+            int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Logs);
+            totalResourceDemand.TryGetValue(WorldStateKeys.LogsInStockpile, out int demand);
+            return (currentStock + onTheGround + inProgressResources[PickupLocation.ResourceType.Logs]) < demand;
+        }
+        if (goal.GoalName.Contains("Iron"))
+        {
+            int currentStock = (int)WorldState.Instance.GetState(WorldStateKeys.IronInStockpile);
+            int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Iron);
+            totalResourceDemand.TryGetValue(WorldStateKeys.IronInStockpile, out int demand);
+            return (currentStock + onTheGround + inProgressResources[PickupLocation.ResourceType.Iron]) < demand;
+        }
+        if (goal.GoalName.Contains("Crystals"))
+        {
+            int currentStock = (int)WorldState.Instance.GetState(WorldStateKeys.CrystalsInStockpile);
+            int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Crystals);
+            totalResourceDemand.TryGetValue(WorldStateKeys.CrystalsInStockpile, out int demand);
+            return (currentStock + onTheGround + inProgressResources[PickupLocation.ResourceType.Crystals]) < demand;
+        }
+
+        return ArePreconditionsMet(goal.GetPreconditions(), worldState);
+    }
 
     private bool ArePreconditionsMet(HashSet<KeyValuePair<string, object>> preconditions, HashSet<KeyValuePair<string, object>> worldState)
     {
@@ -251,26 +159,22 @@ public class TaskManager : MonoBehaviour
         if (task == null) return;
         Debug.LogWarning($"[TaskManager] Task '{task.GoalName}' failed.");
 
-        var resourceType = GetResourceTypeForGoal(task);
-        if (resourceType.HasValue)
-        {
-            if (inProgressResources[resourceType.Value] > 0)
-                inProgressResources[resourceType.Value]--;
-        }
+        if (task.GoalName.Contains("Logs")) inProgressResources[PickupLocation.ResourceType.Logs]--;
+        if (task.GoalName.Contains("Iron")) inProgressResources[PickupLocation.ResourceType.Iron]--;
+        if (task.GoalName.Contains("Crystals")) inProgressResources[PickupLocation.ResourceType.Crystals]--;
     }
 
     public void CompleteTask(GoapGoal task)
     {
         if (task == null) return;
         Debug.Log($"[TaskManager] Task '{task.GoalName}' completed.");
+    }
 
-        var resourceType = GetResourceTypeForGoal(task);
-        if (resourceType.HasValue)
+    public void NotifyResourceDelivered(PickupLocation.ResourceType type)
+    {
+        if (inProgressResources.ContainsKey(type) && inProgressResources[type] > 0)
         {
-            if (inProgressResources[resourceType.Value] > 0)
-            {
-                inProgressResources[resourceType.Value]--;
-            }
+            inProgressResources[type]--;
         }
     }
 }
