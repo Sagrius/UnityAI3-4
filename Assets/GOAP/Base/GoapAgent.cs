@@ -19,6 +19,10 @@ public class GoapAgent : MonoBehaviour, IGoapAgent
     private const float PLAN_RATE = 1f;
     private Vector3 startingPosition;
 
+
+    [SerializeField] private float MaxHealth = 100;
+    [SerializeField] private float currenthealth = 100;
+
     public List<GoapAction> GetAvailableActions() => availableActions;
 
     void Awake()
@@ -167,5 +171,25 @@ public class GoapAgent : MonoBehaviour, IGoapAgent
     public NavMeshAgent getNavAgent()
     {
         return NavMeshAgent;
+    }
+
+    public float GetHealth()
+    {
+        return currenthealth / MaxHealth;
+    }
+
+    public void ModifyHealth(float modification)
+    {
+        currenthealth += modification;
+        if (currenthealth > MaxHealth)
+        {
+            currenthealth = MaxHealth;
+        }
+        else if (currenthealth < 0) { Die(); }
+    }
+
+    public void Die()
+    {
+        Destroy(gameObject);
     }
 }

@@ -6,6 +6,8 @@ public abstract class GoapAction : ScriptableObject
     public string ActionName { get; protected set; } = "GoapAction";
     public float Cost { get; protected set; } = 1.0f;
 
+    public float NNCost { get; protected set; } = 1;
+
     public HashSet<KeyValuePair<string, object>> Preconditions = new HashSet<KeyValuePair<string, object>>();
     public HashSet<KeyValuePair<string, object>> Effects = new HashSet<KeyValuePair<string, object>>();
 

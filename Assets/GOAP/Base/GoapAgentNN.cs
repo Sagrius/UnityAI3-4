@@ -2,6 +2,7 @@ using UnityEngine.AI;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
@@ -19,6 +20,10 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
     private const float PLAN_RATE = 1f;
     private Vector3 startingPosition;
 
+
+    [SerializeField] private float MaxHealth = 100;
+    [SerializeField] private float currenthealth = 100;
+
     public List<GoapAction> GetAvailableActions() => availableActions;
 
     void Awake()
@@ -27,6 +32,36 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
         planner = new GoapPlanner();
         currentPlan = new Queue<GoapAction>();
         startingPosition = transform.position;
+        InputValues = new float[5];
+        OutputValues = new float[5];
+        currenthealth = MaxHealth;
+    }
+
+    public float[] CalculateNN()
+    {
+        SetInput(new float[] { GetHealth(), AsessThreats(), GetDistanceToEnemy(),GetHealingPotionAmount(), DistanceToHealing()});
+        Evaluate();
+        return OutputValues;
+    }
+
+    private float DistanceToHealing()
+    {
+        throw new NotImplementedException();
+    }
+
+    private float GetHealingPotionAmount()
+    {
+        throw new NotImplementedException();
+    }
+
+    private float GetDistanceToEnemy()
+    {
+        throw new NotImplementedException();
+    }
+
+    private float AsessThreats()
+    {
+        throw new NotImplementedException();
     }
 
     void Update()
@@ -173,5 +208,26 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
     public NavMeshAgent getNavAgent()
     {
         return NavMeshAgent;
+    }
+
+
+    public float GetHealth()
+    {
+        return currenthealth / MaxHealth;
+    }
+
+    public void ModifyHealth(float modification)
+    {
+        currenthealth += modification;
+        if (currenthealth > MaxHealth)
+        {
+            currenthealth = MaxHealth;
+        }
+        else if (currenthealth < 0) { Die(); }
+    }
+
+    public void Die()
+    {
+        Destroy(gameObject);
     }
 }
