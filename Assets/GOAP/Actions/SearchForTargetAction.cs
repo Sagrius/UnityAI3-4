@@ -36,7 +36,7 @@ public class SearchForTargetAction : GoapAction
 
         if (potentialTargets.Count > 0)
         {
-            // Set the target on the action itself for internal use
+            
             Target = potentialTargets[0].gameObject;
             return true;
         }
@@ -45,7 +45,6 @@ public class SearchForTargetAction : GoapAction
 
     public override bool Perform(GoapAgent agent)
     {
-        // Pass the found target to the agent so other actions can use it
         agent.CurrentTarget = Target;
         SetDone(true);
         return true;

@@ -36,7 +36,7 @@ public class CombatStats : MonoBehaviour
 
     private System.Collections.IEnumerator UnderAttackTimer()
     {
-        yield return new WaitForSeconds(3f); // Agent feels "in combat" for 3 seconds after being hit
+        yield return new WaitForSeconds(3f); 
         IsUnderAttack = false;
     }
 

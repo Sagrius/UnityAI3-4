@@ -92,7 +92,6 @@ public class TaskManager : MonoBehaviour
         object finalArtifactState = WorldState.Instance.GetState(WorldStateKeys.CombinedArtifactBuilt);
         if (finalArtifactState is bool && (bool)finalArtifactState) return null;
 
-        // *** THE FIX: Self-Preservation Override ***
         if (agent.CombatStats.IsUnderAttack || agent.CombatStats.currentHealth < 30)
         {
             var retreatGoal = allTasks.FirstOrDefault(g => g.GoalName == "Retreat");

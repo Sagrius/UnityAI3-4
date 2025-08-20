@@ -44,8 +44,6 @@ public class ResourceManager : MonoBehaviour
             ResourceSources.Remove(source);
         }
     }
-
-    // NEW METHOD
     public int GetUnclaimedResourceCount(ResourceSource.ResourceType type)
     {
         return ResourceSources.Count(s => s.Type == type && !claimedSources.Contains(s) && s.quantity > 0);

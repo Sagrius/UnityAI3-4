@@ -36,11 +36,8 @@ public class GoapAgent : MonoBehaviour
 
     void Update()
     {
-        // *** THE FIX: High-Priority Interrupt ***
-        // If the agent is in danger, it should drop everything and react.
         if (CombatStats.IsUnderAttack || CombatStats.currentHealth < CombatStats.healingThreshold)
         {
-            // Check if the current plan is already a survival plan.
             bool isSurvivalPlan = currentAction is AttackAgentAction || currentAction is RetreatAction || currentAction is GetHealingPotionAction;
 
             if (currentAction != null && !isSurvivalPlan)

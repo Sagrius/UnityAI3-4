@@ -22,7 +22,6 @@ public class GetHealingPotionAction : GoapAction
 
     public override bool CheckProceduralPrecondition(GoapAgent agent)
     {
-        // Agent will only consider this action if its health is below the threshold
         return agent.CombatStats.currentHealth < agent.CombatStats.healingThreshold && FindObjectOfType<HealthPotion>() != null;
     }
 
@@ -47,7 +46,7 @@ public class GetHealingPotionAction : GoapAction
         }
 
         agent.CombatStats.Heal(potion.healAmount);
-        Destroy(potion.gameObject); // Consume the potion
+        Destroy(potion.gameObject);
         SetDone(true);
         return true;
     }

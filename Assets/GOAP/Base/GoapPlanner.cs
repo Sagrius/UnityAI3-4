@@ -22,10 +22,6 @@ public class GoapPlanner
         {
             if (n.action != null)
             {
-                // *** THE FIX ***
-                // We instantiate a copy of the action asset. This gives the agent
-                // its own unique instance to store runtime data like 'Target',
-                // preventing conflicts with other agents using the same action asset.
                 result.Insert(0, ScriptableObject.Instantiate(n.action));
             }
             n = n.parent;

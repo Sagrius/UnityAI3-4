@@ -27,16 +27,10 @@ public abstract class GoapAction : ScriptableObject
 
     public abstract void OnReset();
 
-    /// <summary>
-    /// Checks if the procedural preconditions for this action are met for planning purposes.
-    /// This should not have side effects like claiming resources.
-    /// </summary>
+    
     public abstract bool CheckProceduralPrecondition(GoapAgent agent);
 
-    /// <summary>
-    /// Sets up the action with its runtime data, like a specific target.
-    /// This is called on the action's instance after a plan is confirmed.
-    /// </summary>
+   
     public abstract bool SetupAction(GoapAgent agent);
 
     public abstract bool Perform(GoapAgent agent);

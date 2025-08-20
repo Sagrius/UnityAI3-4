@@ -23,8 +23,6 @@ public class ChaseTargetAction : GoapAction
 
     public override bool Perform(GoapAgent agent)
     {
-        // The agent's main loop handles movement. This method is only called
-        // when the agent is in range, so we can complete the action.
         SetDone(true);
         return true;
     }
