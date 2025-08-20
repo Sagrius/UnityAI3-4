@@ -25,16 +25,14 @@ public class DeliverResourceAction : GoapAction
 
     public override bool RequiresInRange() => true;
 
-    public override bool CheckProceduralPrecondition(IGoapAgent agent)
+    public override bool CheckProceduralPrecondition(GoapAgent agent)
     {
-        // For planning, just check if any pickup exists.
-        return WorldState.Instance.GetClosestPickup(agent.GetTransform().position) != null;
+        return WorldState.Instance.GetClosestPickup(agent.transform.position) != null;
     }
 
-    public override bool SetupAction(IGoapAgent agent)
+    public override bool SetupAction(GoapAgent agent)
     {
-        // For execution, find the closest pickup and claim it.
-        targetPickup = WorldState.Instance.GetClosestPickup(agent.GetTransform().position);
+        targetPickup = WorldState.Instance.GetClosestPickup(agent.transform.position);
         if (targetPickup != null)
         {
             Target = targetPickup.gameObject;
@@ -44,7 +42,7 @@ public class DeliverResourceAction : GoapAction
         return false;
     }
 
-    public override bool Perform(IGoapAgent agent)
+    public override bool Perform(GoapAgent agent)
     {
         if (hasPickedUp == false && targetPickup == null) return false;
 
@@ -53,14 +51,14 @@ public class DeliverResourceAction : GoapAction
             resourceTypeToDeliver = targetPickup.Type;
             resourceAmountToDeliver = targetPickup.Amount;
             WorldState.Instance.RemovePickup(targetPickup);
-            GameObject.Destroy(targetPickup.gameObject);
+            Destroy(targetPickup.gameObject);
             hasPickedUp = true;
         }
 
         Target = ResourceManager.Instance.BuildLocation.gameObject;
-        agent.getNavAgent().SetDestination(Target.transform.position);
+        agent.NavMeshAgent.SetDestination(Target.transform.position);
 
-        if (Vector3.Distance(agent.GetTransform().position, Target.transform.position) < 3f)
+        if (Vector3.Distance(agent.transform.position, Target.transform.position) < 3f)
         {
             switch (resourceTypeToDeliver)
             {
@@ -74,8 +72,7 @@ public class DeliverResourceAction : GoapAction
                     WorldState.Instance.ModifyState(WorldStateKeys.CrystalsInStockpile, resourceAmountToDeliver);
                     break;
             }
-            Debug.Log($"<color=orange>[{agent.GetAgentName()}] delivered {resourceAmountToDeliver} {resourceTypeToDeliver}.</color>");
-            TaskManager.Instance.NotifyResourceDelivered(resourceTypeToDeliver);
+            Debug.Log($"<color=orange>[{agent.name}] delivered {resourceAmountToDeliver} {resourceTypeToDeliver}.</color>");
             SetDone(true);
         }
         return true;
