@@ -17,7 +17,7 @@ public class CraftItemAction : GoapAction
     public override void OnReset() { Target = null; }
     public override bool RequiresInRange() => true;
 
-    public override bool CheckProceduralPrecondition(GoapAgent agent)
+    public override bool CheckProceduralPrecondition(IGoapAgent agent)
     {
         if (recipe == null)
         {
@@ -37,16 +37,16 @@ public class CraftItemAction : GoapAction
         return true;
     }
 
-    public override bool SetupAction(GoapAgent agent)
+    public override bool SetupAction(IGoapAgent agent)
     {
         // For execution, set the target to the build location.
         Target = ResourceManager.Instance.BuildLocation.gameObject;
         return Target != null;
     }
 
-    public override bool Perform(GoapAgent agent)
+    public override bool Perform(IGoapAgent agent)
     {
-        Debug.Log($"[{agent.name}] is crafting the {recipe.name}!");
+        Debug.Log($"[{agent.GetAgentName()}] is crafting the {recipe.name}!");
 
         foreach (var cost in recipe.requiredResources)
         {

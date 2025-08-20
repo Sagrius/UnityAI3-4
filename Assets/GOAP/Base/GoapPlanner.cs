@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GoapPlanner
 {
-    public Queue<GoapAction> Plan(GoapAgent agent, List<GoapAction> availableActions, HashSet<KeyValuePair<string, object>> worldState, HashSet<KeyValuePair<string, object>> goal)
+    public Queue<GoapAction> Plan(IGoapAgent agent, List<GoapAction> availableActions, HashSet<KeyValuePair<string, object>> worldState, HashSet<KeyValuePair<string, object>> goal)
     {
         List<GoapAction> usableActions = availableActions;
         List<Node> leaves = new List<Node>();

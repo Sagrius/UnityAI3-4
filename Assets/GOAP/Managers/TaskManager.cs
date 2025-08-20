@@ -55,7 +55,7 @@ public class TaskManager : MonoBehaviour
         }
     }
 
-    public GoapGoal RequestTask(GoapAgent agent)
+    public GoapGoal RequestTask(IGoapAgent agent)
     {
         object finalArtifactState = WorldState.Instance.GetState(WorldStateKeys.CombinedArtifactBuilt);
         if (finalArtifactState is bool && (bool)finalArtifactState)
@@ -72,7 +72,7 @@ public class TaskManager : MonoBehaviour
 
             if (IsAgentCapable(agent, task))
             {
-                Debug.Log($"<color=yellow>[TaskManager] Assigning needed task '{task.GoalName}' to {agent.name}.</color>");
+                Debug.Log($"<color=yellow>[TaskManager] Assigning needed task '{task.GoalName}' to {agent.GetAgentName()}.</color>");
 
                 // Track the assigned task to prevent over-assignment
                 if (task.GoalName.Contains("Logs")) inProgressResources[PickupLocation.ResourceType.Logs]++;
@@ -140,7 +140,7 @@ public class TaskManager : MonoBehaviour
         return true;
     }
 
-    private bool IsAgentCapable(GoapAgent agent, GoapGoal goal)
+    private bool IsAgentCapable(IGoapAgent agent, GoapGoal goal)
     {
         var agentActions = agent.GetAvailableActions();
         var goalState = goal.GetGoalState();

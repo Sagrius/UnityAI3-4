@@ -8,7 +8,7 @@ public abstract class GenericCraftingAction : GoapAction
     public override void OnReset() { Target = null; }
     public override bool RequiresInRange() => true;
 
-    public override bool CheckProceduralPrecondition(GoapAgent agent)
+    public override bool CheckProceduralPrecondition(IGoapAgent agent)
     {
         Target = ResourceManager.Instance.BuildLocation.gameObject;
         if (Target == null || recipe == null) return false;
@@ -25,9 +25,9 @@ public abstract class GenericCraftingAction : GoapAction
         return true;
     }
 
-    public override bool Perform(GoapAgent agent)
+    public override bool Perform(IGoapAgent agent)
     {
-        Debug.Log($"[{agent.name}] is crafting the {recipe.name}!");
+        Debug.Log($"[{agent.GetAgentName()}] is crafting the {recipe.name}!");
 
         // Consume resources
         foreach (var cost in recipe.requiredResources)

@@ -51,18 +51,18 @@ public class PrepareAndDropResourceAction : GoapAction
     }
     public override bool RequiresInRange() => true;
 
-    public override bool CheckProceduralPrecondition(GoapAgent agent)
+    public override bool CheckProceduralPrecondition(IGoapAgent agent)
     {
         // For planning, just check if any resource of this type exists.
         var sources = ResourceManager.Instance.ResourceSources.Where(s => s.Type == resourceSourceType && s.quantity >= 1).ToList();
         return sources.Count > 0;
     }
 
-    public override bool SetupAction(GoapAgent agent)
+    public override bool SetupAction(IGoapAgent agent)
     {
         // For execution, find the closest resource and claim it.
         var sources = ResourceManager.Instance.ResourceSources.Where(s => s.Type == resourceSourceType && s.quantity >= 1).ToList();
-        targetResourceSource = ResourceManager.Instance.FindAndClaimClosestResource(sources, agent.transform.position);
+        targetResourceSource = ResourceManager.Instance.FindAndClaimClosestResource(sources, agent.GetTransform().position);
 
         if (targetResourceSource != null)
         {
@@ -73,11 +73,11 @@ public class PrepareAndDropResourceAction : GoapAction
         return false;
     }
 
-    public override bool Perform(GoapAgent agent)
+    public override bool Perform(IGoapAgent agent)
     {
         if (targetResourceSource == null) return false;
 
-        if (agent.NavMeshAgent.pathPending || agent.NavMeshAgent.remainingDistance > agent.NavMeshAgent.stoppingDistance) return true;
+        if (agent.getNavAgent().pathPending || agent.getNavAgent().remainingDistance > agent.getNavAgent().stoppingDistance) return true;
 
         if (!isCollecting) isCollecting = true;
 
@@ -86,7 +86,7 @@ public class PrepareAndDropResourceAction : GoapAction
 
         targetResourceSource.quantity -= 1;
 
-        GameObject pickup = GameObject.Instantiate(ResourceManager.Instance.pickupPrefab, agent.transform.position, Quaternion.identity);
+        GameObject pickup = GameObject.Instantiate(ResourceManager.Instance.pickupPrefab, agent.GetTransform().position, Quaternion.identity);
         var pickupData = pickup.GetComponent<PickupLocation>();
         pickupData.Type = pickupType;
         pickupData.Amount = 1;
@@ -96,7 +96,7 @@ public class PrepareAndDropResourceAction : GoapAction
         // Check if the resource is now empty.
         if (targetResourceSource.quantity <= 0)
         {
-            Debug.Log($"[{agent.name}] depleted {targetResourceSource.name}. Removing from world.");
+            Debug.Log($"[{agent.GetAgentName()}] depleted {targetResourceSource.name}. Removing from world.");
             // Remove it from the manager and destroy the object.
             ResourceManager.Instance.RemoveResourceSource(targetResourceSource);
             Destroy(targetResourceSource.gameObject);

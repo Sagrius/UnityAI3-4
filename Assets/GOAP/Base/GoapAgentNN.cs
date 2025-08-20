@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class GoapAgent : MonoBehaviour, IGoapAgent
+public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 {
     public NavMeshAgent NavMeshAgent { get; private set; }
     private GoapPlanner planner;
@@ -152,6 +152,12 @@ public class GoapAgent : MonoBehaviour, IGoapAgent
             CurrentGoal = null;
         }
         NavMeshAgent.isStopped = true;
+    }
+
+
+    public override float EvaluateScore()
+    {
+        return 0;
     }
 
     public Transform GetTransform()
