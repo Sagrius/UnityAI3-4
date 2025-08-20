@@ -27,13 +27,11 @@ public class DeliverResourceAction : GoapAction
 
     public override bool CheckProceduralPrecondition(GoapAgent agent)
     {
-        // For planning, just check if any pickup exists.
         return WorldState.Instance.GetClosestPickup(agent.transform.position) != null;
     }
 
     public override bool SetupAction(GoapAgent agent)
     {
-        // For execution, find the closest pickup and claim it.
         targetPickup = WorldState.Instance.GetClosestPickup(agent.transform.position);
         if (targetPickup != null)
         {
@@ -53,7 +51,7 @@ public class DeliverResourceAction : GoapAction
             resourceTypeToDeliver = targetPickup.Type;
             resourceAmountToDeliver = targetPickup.Amount;
             WorldState.Instance.RemovePickup(targetPickup);
-            GameObject.Destroy(targetPickup.gameObject);
+            Destroy(targetPickup.gameObject);
             hasPickedUp = true;
         }
 
@@ -75,7 +73,6 @@ public class DeliverResourceAction : GoapAction
                     break;
             }
             Debug.Log($"<color=orange>[{agent.name}] delivered {resourceAmountToDeliver} {resourceTypeToDeliver}.</color>");
-            TaskManager.Instance.NotifyResourceDelivered(resourceTypeToDeliver);
             SetDone(true);
         }
         return true;

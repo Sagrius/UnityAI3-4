@@ -37,12 +37,17 @@ public class ResourceManager : MonoBehaviour
     public void ClaimResource(ResourceSource source) => claimedSources.Add(source);
     public void ReleaseResource(ResourceSource source) => claimedSources.Remove(source);
 
-    // NEW METHOD
     public void RemoveResourceSource(ResourceSource source)
     {
         if (ResourceSources.Contains(source))
         {
             ResourceSources.Remove(source);
         }
+    }
+
+    // NEW METHOD
+    public int GetUnclaimedResourceCount(ResourceSource.ResourceType type)
+    {
+        return ResourceSources.Count(s => s.Type == type && !claimedSources.Contains(s) && s.quantity > 0);
     }
 }
