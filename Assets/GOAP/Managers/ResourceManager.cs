@@ -16,8 +16,8 @@ public class ResourceManager : MonoBehaviour
         if (Instance != null && Instance != this) Destroy(gameObject);
         else Instance = this;
 
-        ResourceSources = FindObjectsOfType<ResourceSource>().ToList();
-        BuildLocation = FindObjectOfType<BuildLocation>();
+        ResourceSources = FindObjectsByType<ResourceSource>(FindObjectsSortMode.None).ToList();
+        BuildLocation = FindFirstObjectByType<BuildLocation>();
     }
 
     public ResourceSource FindAndClaimClosestResource(List<ResourceSource> sources, Vector3 position)
