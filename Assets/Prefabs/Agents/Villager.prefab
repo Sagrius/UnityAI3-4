@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3549654386132110009}
   - component: {fileID: 7679892938582319726}
   - component: {fileID: 2997485996178477605}
-  - component: {fileID: 7618425530903378740}
+  - component: {fileID: 4350151281850939045}
   m_Layer: 0
   m_Name: Villager
   m_TagString: Villager
@@ -73,28 +73,31 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a14cd28c92f462c45a5781c4860b9a61, type: 2}
   - {fileID: 11400000, guid: 218ebcc77e1ac7d4983b17b772acd05f, type: 2}
   - {fileID: 11400000, guid: a8086da6877fb1a459de270f31ea04ac, type: 2}
-  - {fileID: 11400000, guid: 9a59933341b82fb48ab587ea061f0cb4, type: 2}
-  - {fileID: 11400000, guid: eb26bb7198d6cd04690ef42bc291e722, type: 2}
-  - {fileID: 11400000, guid: 3c1169f84462880448015e5593125378, type: 2}
-  - {fileID: 11400000, guid: 034b1355726ba2c41a28590a6b3ca59e, type: 2}
-  - {fileID: 11400000, guid: 6aa6fb53dde58994fa9a52c84d59f453, type: 2}
---- !u!114 &7618425530903378740
-MonoBehaviour:
+  MaxHealth: 100
+  currenthealth: 100
+--- !u!136 &4350151281850939045
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1817550379402266319}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 8
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 175237d625f8dd643b68bacdb5ebb4e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 100
-  attackPower: 10
-  healingThreshold: 50
-  agentType: 0
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &2983579928658668156
 GameObject:
   m_ObjectHideFlags: 0
@@ -141,7 +144,7 @@ GameObject:
   - component: {fileID: 7856920099523399019}
   m_Layer: 0
   m_Name: Capsule
-  m_TagString: Untagged
+  m_TagString: Villager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -231,7 +234,7 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2

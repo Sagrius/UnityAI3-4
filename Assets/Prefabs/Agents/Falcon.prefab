@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 634193207297899632}
   - component: {fileID: 7207940340177475720}
   - component: {fileID: 8320324696526739824}
-  - component: {fileID: 3484658136419010706}
+  - component: {fileID: 5337607321761746155}
   m_Layer: 0
   m_Name: Falcon
   m_TagString: Falcon
@@ -71,23 +71,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   availableActions:
   - {fileID: 11400000, guid: c63b15d5b03f027408e5c185f93e9632, type: 2}
---- !u!114 &3484658136419010706
-MonoBehaviour:
+  MaxHealth: 100
+  currenthealth: 100
+--- !u!136 &5337607321761746155
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 795481937628534593}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 8
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 175237d625f8dd643b68bacdb5ebb4e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 100
-  attackPower: 10
-  healingThreshold: 50
-  agentType: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &965294491179792364
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,7 +110,7 @@ GameObject:
   - component: {fileID: 2202620491138514109}
   m_Layer: 0
   m_Name: Capsule
-  m_TagString: Untagged
+  m_TagString: Falcon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -192,7 +200,7 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2
