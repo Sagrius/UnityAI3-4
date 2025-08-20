@@ -17,7 +17,6 @@ public class ResourceDisplay : MonoBehaviour
         int iron = (int)WorldState.Instance.GetState(WorldStateKeys.IronInStockpile);
         int crystals = (int)WorldState.Instance.GetState(WorldStateKeys.CrystalsInStockpile);
 
-        // This could also be driven by the TaskManager's totalResourceDemand dictionary
         string displayText = $"Logs: {logs} / 5\n" +
                              $"Iron: {iron} / 5\n" +
                              $"Crystals: {crystals} / 4";

@@ -18,14 +18,12 @@ public class CombineArtifactsAction : GoapAction
 
     public override bool CheckProceduralPrecondition(IGoapAgent agent)
     {
-        // This action's preconditions are handled by the planner, so we just need to know
-        // if the build location exists.
+       
         return ResourceManager.Instance.BuildLocation != null;
     }
 
     public override bool SetupAction(IGoapAgent agent)
     {
-        // For execution, set the target to the build location.
         Target = ResourceManager.Instance.BuildLocation.gameObject;
         return Target != null;
     }

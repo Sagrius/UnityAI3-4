@@ -1,4 +1,3 @@
-// File: ResourceSource.cs
 using UnityEngine;
 
 public class ResourceSource : MonoBehaviour

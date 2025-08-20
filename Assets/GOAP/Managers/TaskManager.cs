@@ -70,7 +70,6 @@ public class TaskManager : MonoBehaviour
             {
                 Debug.Log($"<color=yellow>[TaskManager] Assigning needed task '{task.GoalName}' to {agent.GetAgentName()}.</color>");
 
-                // Track the assigned task to prevent over-assignment
                 if (task.GoalName.Contains("Logs")) inProgressResources[PickupLocation.ResourceType.Logs]++;
                 if (task.GoalName.Contains("Iron")) inProgressResources[PickupLocation.ResourceType.Iron]++;
                 if (task.GoalName.Contains("Crystals")) inProgressResources[PickupLocation.ResourceType.Crystals]++;
@@ -100,7 +99,6 @@ public class TaskManager : MonoBehaviour
             return false;
         }
 
-        // Check resource goals against dynamic demand
         if (goal.GoalName.Contains("Logs"))
         {
             int currentStock = (int)WorldState.Instance.GetState(WorldStateKeys.LogsInStockpile);

@@ -35,7 +35,7 @@ public class EvolutionRunner : MonoBehaviour
     [Header("Genetics")]
     [Range(0f, 1f)] public float crossoverRate = 0.5f;
     [Range(0f, 0.5f)] public float mutationRate = 0.01f;
-    [SerializeField] bool elitismKeepParents = true; // keep top-2 unchanged in the next generation
+    [SerializeField] bool elitismKeepParents = true;
 
     [Header("Checkpointing")]
     [SerializeField] int saveEveryNGenerations = 5;
@@ -44,7 +44,7 @@ public class EvolutionRunner : MonoBehaviour
     // --- internal state ---
     int generation = 0;
     bool sceneAssignedThisGen = false;
-    List<List<Matrix<float>>> nextGenWeightBanks; // children produced at end of previous gen
+    List<List<Matrix<float>>> nextGenWeightBanks; 
 
     string CheckpointDir =>
         Path.Combine(Application.persistentDataPath, checkpointFolderName);
@@ -74,19 +74,16 @@ public class EvolutionRunner : MonoBehaviour
 
     IEnumerator EvolutionLoop()
     {
-        // If we are not in the training scene, load it first.
         if (SceneManager.GetActiveScene().name != trainingSceneName)
         {
             SceneManager.LoadScene(trainingSceneName);
-            yield return null; // wait a frame for OnSceneLoaded
+            yield return null; 
         }
 
         while (generation < maxGenerations)
         {
-            // 1) If this is the first generation OR after a scene reload, ensure networks exist on agents
             yield return EnsurePopulationInitializedOrAssigned();
 
-            // 2) Run the episode
             float t = 0f;
             while (t < episodeSeconds)
             {
@@ -94,7 +91,6 @@ public class EvolutionRunner : MonoBehaviour
                 yield return null;
             }
 
-            // 3) Score and select
             var agents = FindObjectsByType<GoapAgentNN>(FindObjectsSortMode.None);
             if (agents.Length == 0)
             {
@@ -102,14 +98,13 @@ public class EvolutionRunner : MonoBehaviour
                 yield break;
             }
 
-            // Evaluate and rank
             var ranked = new List<(GoapAgentNN agent, float score)>(agents.Length);
             foreach (var a in agents)
             {
-                float s = a.ComputeAndCacheScore(); // caches too
+                float s = a.ComputeAndCacheScore();
                 ranked.Add((a, s));
             }
-            ranked.Sort((x, y) => y.score.CompareTo(x.score)); // high to low
+            ranked.Sort((x, y) => y.score.CompareTo(x.score));
 
             var parentA = ranked[0].agent;
             var parentB = ranked[Mathf.Min(1, ranked.Count - 1)].agent;
@@ -117,7 +112,6 @@ public class EvolutionRunner : MonoBehaviour
 
             Debug.Log($"[GEN {generation}] Best score: {bestScore:F3} | A={parentA.name}  B={parentB.name}");
 
-            // 4) Optionally save the champions
             if (saveEveryNGenerations > 0 && (generation % saveEveryNGenerations == 0))
             {
                 string aPath = Path.Combine(CheckpointDir, $"gen{generation:000}_A.json");
@@ -127,14 +121,11 @@ public class EvolutionRunner : MonoBehaviour
                 Debug.Log($"[GEN {generation}] Saved champions to:\n{aPath}\n{bPath}");
             }
 
-            // 5) Build next generation weights now (while we still have parents alive)
             nextGenWeightBanks = new List<List<Matrix<float>>>(populationSize);
 
-            // Elitism: keep exact copies of parents (no mutation)
             int startIdx = 0;
             if (elitismKeepParents)
             {
-                // Clone via crossover with self
                 nextGenWeightBanks.Add(CrossoverClone(parentA));
                 nextGenWeightBanks.Add(CrossoverClone(parentB));
                 startIdx = 2;
@@ -146,19 +137,16 @@ public class EvolutionRunner : MonoBehaviour
                 nextGenWeightBanks.Add(child);
             }
 
-            // 6) Reload scene; assignment happens in OnSceneLoaded
             sceneAssignedThisGen = false;
             generation++;
             SceneManager.LoadScene(trainingSceneName);
 
-            // Wait until assignment finished
             yield return new WaitUntil(() => sceneAssignedThisGen);
         }
 
         Debug.Log($"Evolution finished. Generations run: {maxGenerations}.");
     }
 
-    // Called after each reload. Assigns either random nets (gen0) or the children we cached.
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         StartCoroutine(AssignOnNextFrame());
@@ -166,7 +154,6 @@ public class EvolutionRunner : MonoBehaviour
 
     IEnumerator AssignOnNextFrame()
     {
-        // Wait one frame to ensure all agents are instantiated
         yield return null;
 
         var agents = FindObjectsByType<GoapAgentNN>(FindObjectsSortMode.None);
@@ -177,7 +164,6 @@ public class EvolutionRunner : MonoBehaviour
             yield break;
         }
 
-        // If we have a ready next-gen set, assign + mutate.
         if (nextGenWeightBanks != null && nextGenWeightBanks.Count > 0)
         {
             if (agents.Length != nextGenWeightBanks.Count)
@@ -191,7 +177,6 @@ public class EvolutionRunner : MonoBehaviour
         }
         else
         {
-            // First generation: randomize everyone
             foreach (var a in agents)
             {
                 var (W, B) = CreateRandomSequence(layerSizes, weightInitScale);
@@ -203,25 +188,20 @@ public class EvolutionRunner : MonoBehaviour
         sceneAssignedThisGen = true;
     }
 
-    // Ensures that either (a) next generation was assigned after reload, or (b) gen0 had networks.
     IEnumerator EnsurePopulationInitializedOrAssigned()
     {
-        // Nothing to do: sceneAssignedThisGen is set in OnSceneLoaded after any load.
         yield return null;
     }
 
     // --- Helpers ---
 
-    // Make an exact copy of an agent’s weights via crossover with itself.
     static List<Matrix<float>> CrossoverClone(AbstractNeuralNetworkAgent a)
     {
         return AbstractNeuralNetworkAgent.CrossoverSequences(a, a, 1f);
     }
 
-    // After assigning a sequence to an agent, optionally mutate (except elites)
     void ApplySequenceToAgent(GoapAgentNN agent, List<Matrix<float>> matrices, bool mutate)
     {
-        // We don’t pass expectedInputSize to avoid hard coupling; the NN adapts if needed.
         agent.SetSequence(matrices, biases: null);
         agent.MutationRate = mutationRate;
         if (mutate)
@@ -230,12 +210,10 @@ public class EvolutionRunner : MonoBehaviour
 
     bool ShouldMutate(int index)
     {
-        // If using elitism, first 2 are exact parents (no mutation)
         if (elitismKeepParents && index < 2) return false;
         return true;
     }
 
-    // Random network factory (weights + zero biases) using MathNet
     static (List<Matrix<float>> W, List<Vector<float>> B) CreateRandomSequence(int[] sizes, float scale)
     {
         if (sizes == null || sizes.Length < 2)

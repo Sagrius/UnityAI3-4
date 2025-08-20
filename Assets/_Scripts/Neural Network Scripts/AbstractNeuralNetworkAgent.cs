@@ -10,8 +10,8 @@ using MathNet.Numerics.LinearAlgebra;
 public abstract class AbstractNeuralNetworkAgent : MonoBehaviour, IComparable<AbstractNeuralNetworkAgent>
 {
     // --- Core data ---
-    protected float[] InputValues;   // fixed-size input array
-    protected float[] OutputValues;  // fixed-size output array
+    protected float[] InputValues; 
+    protected float[] OutputValues; 
 
     /// <summary>
     /// Sequence of weight matrices: each is (outputSize x inputSize).
@@ -71,7 +71,6 @@ public abstract class AbstractNeuralNetworkAgent : MonoBehaviour, IComparable<Ab
             throw new ArgumentException("Matrix sequence cannot be null or empty.");
         CalculationSequence = new List<Matrix<float>>(matrices);
 
-        // Validate chaining
         for (int i = 0; i < CalculationSequence.Count - 1; i++)
         {
             int outSize = CalculationSequence[i].RowCount;
@@ -87,7 +86,6 @@ public abstract class AbstractNeuralNetworkAgent : MonoBehaviour, IComparable<Ab
                 throw new InvalidOperationException($"Expected input size {expectedInputSize} != first matrix input {firstIn}.");
         }
 
-        // Biases
         if (biases != null)
         {
             if (biases.Count != matrices.Count)
@@ -104,7 +102,6 @@ public abstract class AbstractNeuralNetworkAgent : MonoBehaviour, IComparable<Ab
             BiasSequence = new List<Vector<float>>();
         }
 
-        // Clear projections so they get regenerated if needed
         _inputProjection = null;
         _outputProjection = null;
         _outputProjectionBias = null;
@@ -148,7 +145,6 @@ public abstract class AbstractNeuralNetworkAgent : MonoBehaviour, IComparable<Ab
         if (CalculationSequence.Count == 0)
             throw new InvalidOperationException("CalculationSequence is empty.");
 
-        // Build initial vector from input array
         var current = Vector<float>.Build.Dense(InputValues);
 
         int expectedIn = CalculationSequence[0].ColumnCount;
@@ -176,7 +172,6 @@ public abstract class AbstractNeuralNetworkAgent : MonoBehaviour, IComparable<Ab
             }
         }
 
-        // Core sequence
         for (int i = 0; i < CalculationSequence.Count; i++)
         {
             current = CalculationSequence[i] * current;
@@ -185,7 +180,6 @@ public abstract class AbstractNeuralNetworkAgent : MonoBehaviour, IComparable<Ab
             current = ApplyActivation(current, i);
         }
 
-        // Output adaptation
         if (desiredOutputSize >= 0 && current.Count != desiredOutputSize)
         {
             if (UseOutputProjectionIfMismatch)
@@ -208,7 +202,6 @@ public abstract class AbstractNeuralNetworkAgent : MonoBehaviour, IComparable<Ab
             }
         }
 
-        // Store output into fixed array
         OutputValues = current.ToArray();
     }
 

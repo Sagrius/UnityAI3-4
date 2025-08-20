@@ -63,7 +63,6 @@ public class GoapAgent : MonoBehaviour, IGoapAgent
         var worldState = WorldState.Instance.GetWorldState();
         var currentState = new HashSet<KeyValuePair<string, object>>(worldState);
 
-        // We still call DoReset on the template assets.
         foreach (var action in availableActions)
         {
             action.DoReset();
@@ -77,8 +76,7 @@ public class GoapAgent : MonoBehaviour, IGoapAgent
         {
             currentPlan = plan;
             currentAction = currentPlan.Peek();
-            // *** THE FIX ***
-            // Setup the first action in the plan.
+           
             if (!currentAction.SetupAction(this))
             {
                 AbortPlan($"Failed to setup first action: {currentAction.ActionName}");
@@ -103,12 +101,11 @@ public class GoapAgent : MonoBehaviour, IGoapAgent
             if (currentPlan.Count > 0)
             {
                 currentAction = currentPlan.Peek();
-                // *** THE FIX ***
-                // Setup the next action in the plan.
+               
                 if (!currentAction.SetupAction(this))
                 {
                     AbortPlan($"Failed to setup action: {currentAction.ActionName}");
-                    return; // Stop execution this frame
+                    return; 
                 }
             }
             else
@@ -134,7 +131,6 @@ public class GoapAgent : MonoBehaviour, IGoapAgent
         }
         else
         {
-            // This case should now be caught by a failing SetupAction call.
             AbortPlan("Action requires a target, but target is null.");
         }
     }

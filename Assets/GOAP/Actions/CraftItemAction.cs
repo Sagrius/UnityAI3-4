@@ -25,7 +25,6 @@ public class CraftItemAction : GoapAction
             return false;
         }
 
-        // For planning, just check if the required resources exist in the world state.
         foreach (var cost in recipe.requiredResources)
         {
             object val = WorldState.Instance.GetState(cost.resourceKey);
@@ -39,7 +38,6 @@ public class CraftItemAction : GoapAction
 
     public override bool SetupAction(IGoapAgent agent)
     {
-        // For execution, set the target to the build location.
         Target = ResourceManager.Instance.BuildLocation.gameObject;
         return Target != null;
     }

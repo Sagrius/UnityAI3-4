@@ -43,7 +43,6 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     public void CalculateNN()
     {
-        //if (WaitingToSerialize) return;
         SetInput(new float[] { GetHealth(), AsessThreats(), GetDistanceToEnemy(),GetHealingPotionAmount(), DistanceToHealing()});
         Evaluate();
         
@@ -105,14 +104,12 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
                 }
                 count++;
             }
-            //else if (c.tag == "Enemy") count--;
         }
         return count;
     }
 
     void Update()
     {
-        //if (WaitingToSerialize) return;
 
         if (planCooldown > 0) planCooldown -= Time.deltaTime;
 
@@ -142,7 +139,6 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
         var worldState = WorldState.Instance.GetWorldState();
         var currentState = new HashSet<KeyValuePair<string, object>>(worldState);
 
-        // We still call DoReset on the template assets.
         foreach (var action in availableActions)
         {
             action.DoReset();
@@ -156,8 +152,7 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
         {
             currentPlan = plan;
             currentAction = currentPlan.Peek();
-            // *** THE FIX ***
-            // Setup the first action in the plan.
+
             if (!currentAction.SetupAction(this))
             {
                 AbortPlan($"Failed to setup first action: {currentAction.ActionName}");
@@ -182,12 +177,11 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
             if (currentPlan.Count > 0)
             {
                 currentAction = currentPlan.Peek();
-                // *** THE FIX ***
-                // Setup the next action in the plan.
+
                 if (!currentAction.SetupAction(this))
                 {
                     AbortPlan($"Failed to setup action: {currentAction.ActionName}");
-                    return; // Stop execution this frame
+                    return; 
                 }
             }
             else
@@ -213,7 +207,6 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
         }
         else
         {
-            // This case should now be caught by a failing SetupAction call.
             AbortPlan("Action requires a target, but target is null.");
         }
     }
@@ -240,15 +233,14 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     public override float EvaluateScore()
     {
-        // --- 1) Build the current feature vector and run the net (5 in → 5 out) ---
-        float hp = GetHealth();                     // [0,1]
-        float enemies = Mathf.Max(0f, AsessThreats());   // count >= 0
-        float distEnemy = GetDistanceToEnemy();            // meters (∞ if none)
-        float potionsNear = GetHealingPotionAmount();        // count
-        float distHeal = DistanceToHealing();             // meters (∞ if none)
+        float hp = GetHealth(); 
+        float enemies = Mathf.Max(0f, AsessThreats()); 
+        float distEnemy = GetDistanceToEnemy();  
+        float potionsNear = GetHealingPotionAmount(); 
+        float distHeal = DistanceToHealing();   
 
         SetInput(new float[] { hp, enemies, distEnemy, potionsNear, distHeal });
-        Evaluate(desiredOutputSize: 5); // fills OutputValues[0..4]
+        Evaluate(desiredOutputSize: 5); 
 
         float outSearch = OutputValues[0];
         float outChase = OutputValues[1];
@@ -256,7 +248,6 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
         float outRetreat = OutputValues[3];
         float outHeal = OutputValues[4];
 
-        // --- 2) Context flags/normalizers (state-derived, no logging required) ---
         const float meleeRange = 2.0f;
         const float distNormMax = 20f;
         bool hasEnemy = (enemies > 0f) && !float.IsInfinity(distEnemy);
@@ -268,29 +259,23 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
         float normCloseEnemy = Mathf.Clamp01((distNormMax - Mathf.Min(distEnemy, distNormMax)) / distNormMax);
         float normCloseHeal = Mathf.Clamp01((distNormMax - Mathf.Min(distHeal, distNormMax)) / distNormMax);
 
-        // --- 3) Score = survival anchor + behavior alignment shaping (clipped) ---
         float score = 0f;
 
-        // Survival anchor: reward being healthier.
         score += 2.0f * hp;
 
-        // Behavior alignment (small shaping so it can't be farmed):
-        if (!hasEnemy) score += 0.30f * outSearch;                           // should be searching if no target
-        if (hasEnemy && !inMelee) score += 0.20f * outChase * normCloseEnemy;         // should close distance
-        if (inMelee) score += 0.20f * outAttack;                           // should attack when in range
-        if (lowHP || outnumbered) score += 0.50f * Mathf.Clamp01(outRetreat);          // should disengage when risky
-        if (lowHP && healAvailableOrNearby) score += 0.50f * outHeal * normCloseHeal;          // should go heal when low
-
-        // Mild deterrents to unhealthy states / stalling:
-        score -= 0.10f * Mathf.Clamp(enemies, 0f, 5f);  // surrounded is bad
-        score -= 0.01f;                                  // tiny anti-idle baseline
+        if (!hasEnemy) score += 0.30f * outSearch;  
+        if (hasEnemy && !inMelee) score += 0.20f * outChase * normCloseEnemy;  
+        if (inMelee) score += 0.20f * outAttack;         
+        if (lowHP || outnumbered) score += 0.50f * Mathf.Clamp01(outRetreat); 
+        if (lowHP && healAvailableOrNearby) score += 0.50f * outHeal * normCloseHeal;   
+        score -= 0.10f * Mathf.Clamp(enemies, 0f, 5f); 
+        score -= 0.01f;                
 
         score += IsAlive ? 3 : 0;
         
             
         
 
-        // Keep it bounded for evolutionary stability.
         return Mathf.Clamp(score, -10f, 10f);
     }
 

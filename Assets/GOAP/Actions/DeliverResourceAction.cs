@@ -27,13 +27,11 @@ public class DeliverResourceAction : GoapAction
 
     public override bool CheckProceduralPrecondition(IGoapAgent agent)
     {
-        // For planning, just check if any pickup exists.
         return WorldState.Instance.GetClosestPickup(agent.GetTransform().position) != null;
     }
 
     public override bool SetupAction(IGoapAgent agent)
     {
-        // For execution, find the closest pickup and claim it.
         targetPickup = WorldState.Instance.GetClosestPickup(agent.GetTransform().position);
         if (targetPickup != null)
         {

@@ -53,14 +53,12 @@ public class PrepareAndDropResourceAction : GoapAction
 
     public override bool CheckProceduralPrecondition(IGoapAgent agent)
     {
-        // For planning, just check if any resource of this type exists.
         var sources = ResourceManager.Instance.ResourceSources.Where(s => s.Type == resourceSourceType && s.quantity >= 1).ToList();
         return sources.Count > 0;
     }
 
     public override bool SetupAction(IGoapAgent agent)
     {
-        // For execution, find the closest resource and claim it.
         var sources = ResourceManager.Instance.ResourceSources.Where(s => s.Type == resourceSourceType && s.quantity >= 1).ToList();
         targetResourceSource = ResourceManager.Instance.FindAndClaimClosestResource(sources, agent.GetTransform().position);
 
@@ -69,7 +67,6 @@ public class PrepareAndDropResourceAction : GoapAction
             Target = targetResourceSource.gameObject;
             return true;
         }
-        // If we fail to find and claim a resource here, the action setup fails.
         return false;
     }
 
@@ -91,19 +88,15 @@ public class PrepareAndDropResourceAction : GoapAction
         pickupData.Type = pickupType;
         pickupData.Amount = 1;
         WorldState.Instance.AddPickup(pickupData);
-
-        // *** THE FIX ***
-        // Check if the resource is now empty.
+        
         if (targetResourceSource.quantity <= 0)
         {
             Debug.Log($"[{agent.GetAgentName()}] depleted {targetResourceSource.name}. Removing from world.");
-            // Remove it from the manager and destroy the object.
             ResourceManager.Instance.RemoveResourceSource(targetResourceSource);
             Destroy(targetResourceSource.gameObject);
         }
         else
         {
-            // If it's not empty, just release the claim so another agent can use it.
             ResourceManager.Instance.ReleaseResource(targetResourceSource);
         }
 

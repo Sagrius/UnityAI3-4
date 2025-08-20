@@ -37,7 +37,6 @@ public class ResourceManager : MonoBehaviour
     public void ClaimResource(ResourceSource source) => claimedSources.Add(source);
     public void ReleaseResource(ResourceSource source) => claimedSources.Remove(source);
 
-    // NEW METHOD
     public void RemoveResourceSource(ResourceSource source)
     {
         if (ResourceSources.Contains(source))
