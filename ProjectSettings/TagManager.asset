@@ -11,6 +11,7 @@ TagManager:
   - Falcon
   - BuildLocation
   - Mine
+  - Enemy
   layers:
   - Default
   - TransparentFX

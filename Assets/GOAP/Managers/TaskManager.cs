@@ -19,10 +19,6 @@ public class TaskManager : MonoBehaviour
         else Instance = this;
         allTasks = new List<GoapGoal>(tasks);
 
-        // Initialize with enums for type safety
-        inProgressResources.Add(PickupLocation.ResourceType.Logs, 0);
-        inProgressResources.Add(PickupLocation.ResourceType.Iron, 0);
-        inProgressResources.Add(PickupLocation.ResourceType.Crystals, 0);
     }
 
     void Update()
@@ -74,10 +70,6 @@ public class TaskManager : MonoBehaviour
             {
                 Debug.Log($"<color=yellow>[TaskManager] Assigning needed task '{task.GoalName}' to {agent.GetAgentName()}.</color>");
 
-                // Track the assigned task to prevent over-assignment
-                if (task.GoalName.Contains("Logs")) inProgressResources[PickupLocation.ResourceType.Logs]++;
-                if (task.GoalName.Contains("Iron")) inProgressResources[PickupLocation.ResourceType.Iron]++;
-                if (task.GoalName.Contains("Crystals")) inProgressResources[PickupLocation.ResourceType.Crystals]++;
 
                 return task;
             }
@@ -104,28 +96,7 @@ public class TaskManager : MonoBehaviour
             return false;
         }
 
-        // Check resource goals against dynamic demand
-        if (goal.GoalName.Contains("Logs"))
-        {
-            int currentStock = (int)WorldState.Instance.GetState(WorldStateKeys.LogsInStockpile);
-            int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Logs);
-            totalResourceDemand.TryGetValue(WorldStateKeys.LogsInStockpile, out int demand);
-            return (currentStock + onTheGround + inProgressResources[PickupLocation.ResourceType.Logs]) < demand;
-        }
-        if (goal.GoalName.Contains("Iron"))
-        {
-            int currentStock = (int)WorldState.Instance.GetState(WorldStateKeys.IronInStockpile);
-            int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Iron);
-            totalResourceDemand.TryGetValue(WorldStateKeys.IronInStockpile, out int demand);
-            return (currentStock + onTheGround + inProgressResources[PickupLocation.ResourceType.Iron]) < demand;
-        }
-        if (goal.GoalName.Contains("Crystals"))
-        {
-            int currentStock = (int)WorldState.Instance.GetState(WorldStateKeys.CrystalsInStockpile);
-            int onTheGround = WorldState.Instance.CountPickupsOfType(PickupLocation.ResourceType.Crystals);
-            totalResourceDemand.TryGetValue(WorldStateKeys.CrystalsInStockpile, out int demand);
-            return (currentStock + onTheGround + inProgressResources[PickupLocation.ResourceType.Crystals]) < demand;
-        }
+        
 
         return ArePreconditionsMet(goal.GetPreconditions(), worldState);
     }
@@ -158,10 +129,6 @@ public class TaskManager : MonoBehaviour
     {
         if (task == null) return;
         Debug.LogWarning($"[TaskManager] Task '{task.GoalName}' failed.");
-
-        if (task.GoalName.Contains("Logs")) inProgressResources[PickupLocation.ResourceType.Logs]--;
-        if (task.GoalName.Contains("Iron")) inProgressResources[PickupLocation.ResourceType.Iron]--;
-        if (task.GoalName.Contains("Crystals")) inProgressResources[PickupLocation.ResourceType.Crystals]--;
     }
 
     public void CompleteTask(GoapGoal task)

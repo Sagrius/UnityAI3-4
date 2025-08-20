@@ -53,6 +53,8 @@ public class TaskManagerNN : MonoBehaviour
         }
     }
 
+
+
     public GoapGoal RequestTask(GoapAgentNN agent)
     {
         object finalArtifactState = WorldState.Instance.GetState(WorldStateKeys.CombinedArtifactBuilt);
@@ -60,8 +62,10 @@ public class TaskManagerNN : MonoBehaviour
         {
             return null;
         }
+        agent.CalculateNN();
 
-        foreach (var task in allTasks.OrderByDescending(t => t.Priority))
+
+        foreach (var task in allTasks.OrderByDescending(t => agent.GetSpecificOutput(t.GoalName)))
         {
             if (!IsTaskStillNeeded(task))
             {

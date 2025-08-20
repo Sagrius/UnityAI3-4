@@ -23,6 +23,10 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     [SerializeField] private float MaxHealth = 100;
     [SerializeField] private float currenthealth = 100;
+    private bool WaitingToSerialize = true;
+
+    private Transform closestEnemyLocation;
+    private Transform closestPotionLocation;
 
     public List<GoapAction> GetAvailableActions() => availableActions;
 
@@ -37,35 +41,77 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
         currenthealth = MaxHealth;
     }
 
-    public float[] CalculateNN()
+    public void CalculateNN()
     {
+        if (WaitingToSerialize) return;
         SetInput(new float[] { GetHealth(), AsessThreats(), GetDistanceToEnemy(),GetHealingPotionAmount(), DistanceToHealing()});
         Evaluate();
-        return OutputValues;
+        
+    }
+
+    public float GetSpecificOutput(string Name)
+    {
+        if (Name == EnemyDataConsts.SEARCHING) return OutputValues[0];
+        else if (Name == EnemyDataConsts.CHASETARGET) return OutputValues[1];
+        else if (Name == EnemyDataConsts.ATTACKTARGET) return OutputValues[2];
+        else if (Name == EnemyDataConsts.RETREAT) return OutputValues[3];
+        else if (Name == EnemyDataConsts.GETHEAL) return OutputValues[4];
+        return 0;
     }
 
     private float DistanceToHealing()
     {
-        throw new NotImplementedException();
+        return (closestPotionLocation.position - transform.position).magnitude;
     }
 
     private float GetHealingPotionAmount()
     {
-        throw new NotImplementedException();
+        int count = 0;
+        Collider[] vision = Physics.OverlapSphere(transform.position, 15);
+
+        foreach (Collider c in vision)
+        {
+            if (c.tag == "Potion")
+            {
+                if ((c.transform.position - transform.position).magnitude < (closestPotionLocation.position - transform.position).magnitude)
+                {
+                    closestPotionLocation = c.transform;
+                }
+                count++;
+            }
+        }
+        return count;
     }
 
     private float GetDistanceToEnemy()
     {
-        throw new NotImplementedException();
+        return (closestEnemyLocation.position - transform.position).magnitude;
     }
 
     private float AsessThreats()
     {
-        throw new NotImplementedException();
+        int count = 0;
+        Collider[] vision = Physics.OverlapSphere(transform.position,15);
+
+        foreach (Collider c in vision)
+        {
+            if (c.tag == "Falcon" || c.tag == "Villager" || c.tag == "Mage")
+            {
+                if ((c.transform.position-transform.position).magnitude < (closestEnemyLocation.position - transform.position).magnitude)
+                {
+                    closestEnemyLocation = c.transform;
+                }
+                count++;
+            }
+            //else if (c.tag == "Enemy") count--;
+        }
+        return count;
     }
 
     void Update()
     {
+        if (WaitingToSerialize) return;
+
         if (planCooldown > 0) planCooldown -= Time.deltaTime;
 
         if (CurrentGoal == null && planCooldown <= 0)

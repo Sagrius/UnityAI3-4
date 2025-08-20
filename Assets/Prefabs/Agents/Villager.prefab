@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3549654386132110009}
   - component: {fileID: 7679892938582319726}
   - component: {fileID: 2997485996178477605}
+  - component: {fileID: 4350151281850939045}
   m_Layer: 0
   m_Name: Villager
   m_TagString: Villager
@@ -72,6 +73,31 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a14cd28c92f462c45a5781c4860b9a61, type: 2}
   - {fileID: 11400000, guid: 218ebcc77e1ac7d4983b17b772acd05f, type: 2}
   - {fileID: 11400000, guid: a8086da6877fb1a459de270f31ea04ac, type: 2}
+  MaxHealth: 100
+  currenthealth: 100
+--- !u!136 &4350151281850939045
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1817550379402266319}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 8
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &2983579928658668156
 GameObject:
   m_ObjectHideFlags: 0
@@ -118,7 +144,7 @@ GameObject:
   - component: {fileID: 7856920099523399019}
   m_Layer: 0
   m_Name: Capsule
-  m_TagString: Untagged
+  m_TagString: Villager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -208,7 +234,7 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2
