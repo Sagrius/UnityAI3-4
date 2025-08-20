@@ -1,4 +1,4 @@
-using UnityEngine.AI;
+﻿using UnityEngine.AI;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -24,6 +24,7 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
     [SerializeField] private float MaxHealth = 100;
     [SerializeField] private float currenthealth = 100;
     private bool WaitingToSerialize = true;
+    private bool IsAlive = true;
 
     private Transform closestEnemyLocation;
     private Transform closestPotionLocation;
@@ -240,7 +241,58 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     public override float EvaluateScore()
     {
-        return 0;
+        // --- 1) Build the current feature vector and run the net (5 in → 5 out) ---
+        float hp = GetHealth();                     // [0,1]
+        float enemies = Mathf.Max(0f, AsessThreats());   // count >= 0
+        float distEnemy = GetDistanceToEnemy();            // meters (∞ if none)
+        float potionsNear = GetHealingPotionAmount();        // count
+        float distHeal = DistanceToHealing();             // meters (∞ if none)
+
+        SetInput(new float[] { hp, enemies, distEnemy, potionsNear, distHeal });
+        Evaluate(desiredOutputSize: 5); // fills OutputValues[0..4]
+
+        float outSearch = OutputValues[0];
+        float outChase = OutputValues[1];
+        float outAttack = OutputValues[2];
+        float outRetreat = OutputValues[3];
+        float outHeal = OutputValues[4];
+
+        // --- 2) Context flags/normalizers (state-derived, no logging required) ---
+        const float meleeRange = 2.0f;
+        const float distNormMax = 20f;
+        bool hasEnemy = (enemies > 0f) && !float.IsInfinity(distEnemy);
+        bool inMelee = hasEnemy && (distEnemy <= meleeRange);
+        bool lowHP = hp < 0.30f;
+        bool outnumbered = enemies >= 3f;
+        bool healAvailableOrNearby = (potionsNear > 0f) || !float.IsInfinity(distHeal);
+
+        float normCloseEnemy = Mathf.Clamp01((distNormMax - Mathf.Min(distEnemy, distNormMax)) / distNormMax);
+        float normCloseHeal = Mathf.Clamp01((distNormMax - Mathf.Min(distHeal, distNormMax)) / distNormMax);
+
+        // --- 3) Score = survival anchor + behavior alignment shaping (clipped) ---
+        float score = 0f;
+
+        // Survival anchor: reward being healthier.
+        score += 2.0f * hp;
+
+        // Behavior alignment (small shaping so it can't be farmed):
+        if (!hasEnemy) score += 0.30f * outSearch;                           // should be searching if no target
+        if (hasEnemy && !inMelee) score += 0.20f * outChase * normCloseEnemy;         // should close distance
+        if (inMelee) score += 0.20f * outAttack;                           // should attack when in range
+        if (lowHP || outnumbered) score += 0.50f * Mathf.Clamp01(outRetreat);          // should disengage when risky
+        if (lowHP && healAvailableOrNearby) score += 0.50f * outHeal * normCloseHeal;          // should go heal when low
+
+        // Mild deterrents to unhealthy states / stalling:
+        score -= 0.10f * Mathf.Clamp(enemies, 0f, 5f);  // surrounded is bad
+        score -= 0.01f;                                  // tiny anti-idle baseline
+
+        score += IsAlive ? 3 : 0;
+        
+            
+        
+
+        // Keep it bounded for evolutionary stability.
+        return Mathf.Clamp(score, -10f, 10f);
     }
 
     public Transform GetTransform()
@@ -276,6 +328,9 @@ public class GoapAgentNN : AbstractNeuralNetworkAgent, IGoapAgent
 
     public void Die()
     {
-        Destroy(gameObject);
+        IsAlive = false;
+        gameObject.SetActive(false);
     }
+
+
 }

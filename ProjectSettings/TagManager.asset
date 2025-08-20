@@ -12,6 +12,7 @@ TagManager:
   - BuildLocation
   - Mine
   - Enemy
+  - Potion
   layers:
   - Default
   - TransparentFX
